@@ -1,0 +1,91 @@
+---
+description: Spring Boot + Java best practices for bank transfer service development
+globs: **/*
+alwaysApply: true
+---
+
+# Spring Boot & Java Best Practices
+
+Apply these conventions on every change in this project:
+
+## Tech Stack
+- Java 17+ / Java 25
+- Spring Boot 3.4.x / 4.x
+- Spring Data JPA
+- PostgreSQL / H2 Database
+- SpringDoc OpenAPI (Swagger UI)
+- ZXing (Zebra Crossing) for QR Code Generation
+- Maven
+
+## Naming Conventions (Always in English)
+- Classes: PascalCase (e.g., `TransferService`, `AccountController`, `TransactionRepository`)
+- Interfaces: PascalCase (e.g., `AccountService`, `TransactionRepository`)
+- Methods & Variables: camelCase (e.g., `processTransfer`, `sourceAccountNumber`, `findAccountByNumber`)
+- Constants: UPPER_SNAKE_CASE (e.g., `DEFAULT_PAGE_SIZE`, `TRANSACTION_SUCCESS`)
+- Packages: lowercase dot-separated (e.g., `com.udea.banktransfer.controller`)
+
+## Data Transfer Objects (DTO)
+- Use **Java Records** exclusively for all DTOs (Request & Response).
+- Records must be immutable, concise, and include validation annotations where required (`@NotNull`, `@Positive`, `@NotBlank`).
+
+## Documentation
+- Every public class and public method MUST have an updated, informative **Javadoc** comment detailing parameters, return values, and thrown exceptions.
+
+## Architecture & Layers
+1. **Controller Layer (`controller`)**:
+   - Exposes RESTful endpoints.
+   - Validates incoming HTTP requests.
+   - Returns appropriate HTTP status codes (200 OK, 201 Created, 400 Bad Request, 404 Not Found, 409 Conflict).
+2. **Service Layer (`service` & `service.impl`)**:
+   - Encapsulates all business logic.
+   - Uses `@Transactional` for state-modifying operations (such as money transfers).
+   - Throws descriptive domain-specific custom exceptions.
+3. **Repository Layer (`repository`)**:
+   - Extends Spring Data `JpaRepository`.
+   - Uses derived query methods and `@Query` when appropriate.
+4. **Entity Layer (`entity`)**:
+   - JPA entities with proper annotations (`@Entity`, `@Table`, `@Id`, `@GeneratedValue`, `@Column`, `@Enumerated`).
+5. **Exception Handling (`exception`)**:
+   - Centralized `@RestControllerAdvice` with `@ExceptionHandler` methods producing standardized JSON error structures.
+6. **Configuration (`config`)**:
+   - Centralized CORS filter permitting frontend origins (`http://localhost:3000`, `http://localhost:5173`).
+   - OpenAPI / Swagger documentation configuration.
+
+## Project Structure
+```
+backend/
+├── src/
+│   ├── main/
+│   │   ├── java/com/udea/banktransfer/
+│   │   │   ├── config/
+│   │   │   ├── controller/
+│   │   │   ├── dto/
+│   │   │   ├── entity/
+│   │   │   ├── exception/
+│   │   │   ├── repository/
+│   │   │   ├── service/
+│   │   │   │   └── impl/
+│   │   │   └── BankTransferApplication.java
+│   │   └── resources/
+│   │       ├── application.properties
+│   │       └── application-postgres.properties
+│   └── test/
+└── pom.xml
+
+frontend/
+├── src/
+│   ├── components/
+│   │   ├── AccountList/
+│   │   ├── TransferForm/
+│   │   ├── TransactionHistory/
+│   │   └── ReceiptModal/
+│   ├── services/
+│   │   └── transferService.ts
+│   ├── types/
+│   │   └── bank.ts
+│   ├── App.tsx
+│   ├── App.css
+│   └── main.tsx
+├── package.json
+└── vite.config.ts
+```
