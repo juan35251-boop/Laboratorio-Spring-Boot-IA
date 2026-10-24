@@ -1,0 +1,372 @@
+.receipt-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.receipt-dialog {
+  background: #ffffff;
+  border-radius: 20px;
+  max-width: 520px;
+  width: 100%;
+  padding: 30px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  position: relative;
+  animation: modalScaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@keyframes modalScaleUp {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.receipt-close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #f1f5f9;
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.15s ease;
+}
+
+.receipt-close-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.receipt-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.success-badge-ring {
+  width: 68px;
+  height: 68px;
+  background: #ecfdf5;
+  border: 4px solid #a7f3d0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px auto;
+  color: #059669;
+}
+
+.receipt-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.01em;
+}
+
+.receipt-subtitle {
+  font-size: 0.86rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.receipt-amount-card {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+  color: #ffffff;
+  margin-bottom: 20px;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.15);
+}
+
+.amount-caption {
+  display: block;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  color: #94a3b8;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.amount-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #34d399;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.amount-status-badge {
+  display: inline-block;
+  background: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.receipt-details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 20px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: 0.86rem;
+}
+
+.detail-row.highlight-balance {
+  padding-top: 8px;
+  border-top: 1px dashed #cbd5e1;
+}
+
+.detail-label {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.detail-value {
+  color: #0f172a;
+  font-weight: 600;
+  text-align: right;
+}
+
+.detail-value-with-copy {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+
+.copy-mini-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: all 0.15s;
+}
+
+.copy-mini-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.copied-tooltip {
+  position: absolute;
+  right: 24px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.detail-account-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.detail-account-name {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.mono-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: #0f172a;
+}
+
+.mono-subtext {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.76rem;
+  color: #64748b;
+}
+
+.font-bold {
+  font-weight: 800;
+  color: #059669;
+}
+
+/* QR Code Section */
+.receipt-qr-section {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.qr-badge-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #166534;
+  font-weight: 800;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.qr-hint {
+  font-size: 0.8rem;
+  color: #475569;
+  margin: 0 0 14px 0;
+}
+
+.qr-image-wrapper {
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 12px;
+  display: inline-block;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+}
+
+.qr-image {
+  width: 190px;
+  height: 190px;
+  display: block;
+}
+
+.qr-actions-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.qr-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #166534;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.qr-tool-btn:hover {
+  background: #14532d;
+}
+
+.qr-tool-btn.outline {
+  background: transparent;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.qr-tool-btn.outline:hover {
+  background: #dcfce7;
+}
+
+.qr-payload-preview {
+  margin-top: 12px;
+  background: #0f172a;
+  color: #38bdf8;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: left;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+/* Footer buttons */
+.receipt-footer {
+  display: flex;
+  gap: 12px;
+}
+
+.receipt-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.receipt-btn.primary {
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+}
+
+.receipt-btn.primary:hover {
+  background: #1e293b;
+}
+
+.receipt-btn.secondary {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+
+.receipt-btn.secondary:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+@media print {
+  .receipt-backdrop {
+    background: none;
+    position: static;
+    padding: 0;
+  }
+  .receipt-close-btn,
+  .receipt-footer,
+  .qr-actions-row {
+    display: none !important;
+  }
+}
