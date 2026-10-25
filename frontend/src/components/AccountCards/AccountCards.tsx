@@ -1,6 +1,6 @@
 import React from 'react';
 import { Account } from '../../types/bank';
-import { ShieldCheck, Copy } from 'lucide-react';
+import { ShieldCheck, Copy, Landmark } from 'lucide-react';
 import './AccountCards.css';
 
 interface AccountCardsProps {
@@ -50,6 +50,10 @@ export const AccountCards: React.FC<AccountCardsProps> = ({
               className={`account-card ${isSource ? 'active-source' : ''} ${isDest ? 'active-dest' : ''}`}
             >
               <div className="account-card-header">
+                <span className="card-bank-tag">
+                  <Landmark size={12} />
+                  {acc.bankName || 'Banco TdeA'}
+                </span>
                 <span className={`badge-type ${acc.accountType.toLowerCase()}`}>
                   {acc.accountType === 'SAVINGS' ? 'Ahorros' : 'Corriente'}
                 </span>

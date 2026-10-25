@@ -39,6 +39,9 @@ public class Transaction {
     @Column(name = "description", length = 255)
     private String description;
 
+    @Column(name = "bank_name", length = 80)
+    private String bankName = "Banco TdeA";
+
     @Column(name = "timestamp", nullable = false, updatable = false)
     private LocalDateTime timestamp;
 
@@ -74,9 +77,17 @@ public class Transaction {
     public Transaction(String transactionReference, String sourceAccountNumber,
                        String destinationAccountNumber, BigDecimal amount, String description,
                        TransactionStatus status, String qrCodeData, String qrCodeBase64) {
+        this(transactionReference, sourceAccountNumber, destinationAccountNumber, "Banco TdeA",
+                amount, description, status, qrCodeData, qrCodeBase64);
+    }
+
+    public Transaction(String transactionReference, String sourceAccountNumber,
+                       String destinationAccountNumber, String bankName, BigDecimal amount, String description,
+                       TransactionStatus status, String qrCodeData, String qrCodeBase64) {
         this.transactionReference = transactionReference;
         this.sourceAccountNumber = sourceAccountNumber;
         this.destinationAccountNumber = destinationAccountNumber;
+        this.bankName = bankName != null ? bankName : "Banco TdeA";
         this.amount = amount;
         this.description = description;
         this.status = status;
@@ -138,6 +149,14 @@ public class Transaction {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
     }
 
     public LocalDateTime getTimestamp() {

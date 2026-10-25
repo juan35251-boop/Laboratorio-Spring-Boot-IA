@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TransferResponse } from '../../types/bank';
-import { History, Search, QrCode, RefreshCw, FileText } from 'lucide-react';
+import { History, Search, QrCode, RefreshCw, FileText, Landmark } from 'lucide-react';
 import './TransactionHistory.css';
 
 interface TransactionHistoryProps {
@@ -27,14 +27,25 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
   };
 
   const filtered = transactions.filter((t) => {
-    const term = searchTerm.toLowerCase();
+    const term = searchTerm.toLowerCase().trim();
+    if (!term) return true;
+
+    const bank = (t.bankName || 'Banco TdeA').toLowerCase();
+    const isGenericBankSearch = 'banco'.includes(term) || 'tdea'.includes(term) || 'banco tdea'.includes(term);
+
     return (
+      isGenericBankSearch ||
+      bank.includes(term) ||
       t.transactionReference.toLowerCase().includes(term) ||
       t.sourceAccountNumber.toLowerCase().includes(term) ||
       t.sourceAccountHolder.toLowerCase().includes(term) ||
       t.destinationAccountNumber.toLowerCase().includes(term) ||
       t.destinationAccountHolder.toLowerCase().includes(term) ||
-      (t.description && t.description.toLowerCase().includes(term))
+      (t.description && t.description.toLowerCase().includes(term)) ||
+      t.amount.toString().includes(term) ||
+      formatCOP(t.amount).toLowerCase().includes(term) ||
+      t.status.toLowerCase().includes(term) ||
+      (t.status === 'SUCCESS' && 'aprobada'.includes(term))
     );
   });
 
@@ -93,6 +104,7 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
             <thead>
               <tr>
                 <th>Referencia</th>
+                <th>Banco</th>
                 <th>Fecha y Hora</th>
                 <th>Cuenta Origen</th>
                 <th>Cuenta Destino</th>
@@ -107,6 +119,12 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
                 <tr key={t.id} className="history-row">
                   <td>
                     <span className="reference-tag">{t.transactionReference}</span>
+                  </td>
+                  <td>
+                    <span className="bank-badge">
+                      <Landmark size={12} />
+                      {t.bankName || 'Banco TdeA'}
+                    </span>
                   </td>
                   <td>
                     <span className="timestamp-text">

@@ -29,6 +29,9 @@ public class Account {
     @Column(name = "account_holder", nullable = false, length = 120)
     private String accountHolder;
 
+    @Column(name = "bank_name", nullable = false, length = 80)
+    private String bankName = "Banco TdeA";
+
     @Enumerated(EnumType.STRING)
     @Column(name = "account_type", nullable = false, length = 20)
     private AccountType accountType;
@@ -59,8 +62,13 @@ public class Account {
      * @param status the operational status of the account
      */
     public Account(String accountNumber, String accountHolder, AccountType accountType, BigDecimal balance, AccountStatus status) {
+        this(accountNumber, accountHolder, "Banco TdeA", accountType, balance, status);
+    }
+
+    public Account(String accountNumber, String accountHolder, String bankName, AccountType accountType, BigDecimal balance, AccountStatus status) {
         this.accountNumber = accountNumber;
         this.accountHolder = accountHolder;
+        this.bankName = bankName != null ? bankName : "Banco TdeA";
         this.accountType = accountType;
         this.balance = balance;
         this.status = status;
@@ -99,6 +107,14 @@ public class Account {
 
     public void setAccountHolder(String accountHolder) {
         this.accountHolder = accountHolder;
+    }
+
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
     }
 
     public AccountType getAccountType() {

@@ -106,6 +106,7 @@ public class AccountServiceImpl implements AccountService {
                 account.getId(),
                 account.getAccountNumber(),
                 account.getAccountHolder(),
+                account.getBankName(),
                 account.getAccountType(),
                 account.getBalance(),
                 account.getStatus(),

@@ -6,6 +6,7 @@ export interface Account {
   id: number;
   accountNumber: string;
   accountHolder: string;
+  bankName?: string;
   accountType: AccountType;
   balance: number;
   status: AccountStatus;
@@ -15,6 +16,7 @@ export interface Account {
 export interface TransferRequest {
   sourceAccountNumber: string;
   destinationAccountNumber: string;
+  bankName?: string;
   amount: number;
   description: string;
 }
@@ -26,6 +28,7 @@ export interface TransferResponse {
   sourceAccountHolder: string;
   destinationAccountNumber: string;
   destinationAccountHolder: string;
+  bankName?: string;
   amount: number;
   description: string;
   timestamp: string;

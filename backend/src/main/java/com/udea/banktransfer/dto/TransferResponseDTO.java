@@ -42,6 +42,9 @@ public record TransferResponseDTO(
         @Schema(description = "Destination account holder name", example = "Maria Rodriguez")
         String destinationAccountHolder,
 
+        @Schema(description = "Bank entity name", example = "Banco TdeA")
+        String bankName,
+
         @Schema(description = "Amount transferred", example = "150000.00")
         BigDecimal amount,
 

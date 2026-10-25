@@ -66,6 +66,19 @@
   align-items: center;
 }
 
+.card-bank-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #065f46;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
 .badge-type {
   font-size: 0.72rem;
   font-weight: 700;

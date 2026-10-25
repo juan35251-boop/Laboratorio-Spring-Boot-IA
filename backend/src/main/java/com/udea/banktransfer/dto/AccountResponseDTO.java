@@ -28,6 +28,9 @@ public record AccountResponseDTO(
         @Schema(description = "Account holder name", example = "Carlos Gomez")
         String accountHolder,
 
+        @Schema(description = "Bank entity name", example = "Banco TdeA")
+        String bankName,
+
         @Schema(description = "Account type", example = "SAVINGS")
         AccountType accountType,
 
