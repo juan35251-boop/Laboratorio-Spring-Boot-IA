@@ -52,3 +52,6 @@ frontend/build/
 *.sln
 *.sw?
 .DS_Store
+
+*.lock.db
+*.trace.db
