@@ -32,14 +32,18 @@ import java.util.List;
 public class TransferController {
 
     private final TransferService transferService;
+    private final com.udea.banktransfer.service.VoucherViewService voucherViewService;
 
     /**
-     * Constructor injection for transfer service.
+     * Constructor injection for transfer and voucher view services.
      *
      * @param transferService transfer business service
+     * @param voucherViewService voucher HTML rendering service
      */
-    public TransferController(TransferService transferService) {
+    public TransferController(TransferService transferService,
+                              com.udea.banktransfer.service.VoucherViewService voucherViewService) {
         this.transferService = transferService;
+        this.voucherViewService = voucherViewService;
     }
 
     /**
@@ -101,5 +105,20 @@ public class TransferController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.IMAGE_PNG);
         return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
+    }
+
+    /**
+     * Serves an official bank digital voucher formatted as a PDF receipt.
+     * Accessible by mobile devices when scanning the transaction QR code.
+     *
+     * @param reference unique transaction reference code
+     * @return HTML5 document rendering the official transaction voucher
+     */
+    @Operation(summary = "Get official transaction voucher HTML", description = "Returns a responsive HTML document formatted as an official bank PDF receipt for mobile and desktop")
+    @GetMapping(value = "/{reference}/voucher", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<String> getTransactionVoucherHtml(@PathVariable String reference) {
+        TransferResponseDTO response = transferService.getTransactionByReference(reference);
+        String html = voucherViewService.generateVoucherHtml(response);
+        return ResponseEntity.ok(html);
     }
 }

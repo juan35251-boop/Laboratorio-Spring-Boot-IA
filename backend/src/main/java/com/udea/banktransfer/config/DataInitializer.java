@@ -32,7 +32,8 @@ public class DataInitializer {
     @Bean
     public CommandLineRunner initData(AccountRepository accountRepository,
                                       TransactionRepository transactionRepository,
-                                      QrCodeService qrCodeService) {
+                                      QrCodeService qrCodeService,
+                                      com.udea.banktransfer.service.VoucherViewService voucherViewService) {
         return args -> {
             // 1. Seed Accounts
             if (accountRepository.count() == 0) {
@@ -78,6 +79,7 @@ public class DataInitializer {
                 createSeedTransaction(
                         transactionRepository,
                         qrCodeService,
+                        voucherViewService,
                         "TXN-20261022-894101",
                         "CTA-1001-SAVINGS",
                         "Carlos Gómez Restrepo",
@@ -91,6 +93,7 @@ public class DataInitializer {
                 createSeedTransaction(
                         transactionRepository,
                         qrCodeService,
+                        voucherViewService,
                         "TXN-20261022-921473",
                         "CTA-2002-CHECKING",
                         "María Camila Rodríguez",
@@ -104,6 +107,7 @@ public class DataInitializer {
                 createSeedTransaction(
                         transactionRepository,
                         qrCodeService,
+                        voucherViewService,
                         "TXN-20261023-110294",
                         "CTA-3003-SAVINGS",
                         "Juan Fernando Pérez",
@@ -117,6 +121,7 @@ public class DataInitializer {
                 createSeedTransaction(
                         transactionRepository,
                         qrCodeService,
+                        voucherViewService,
                         "TXN-20261023-164831",
                         "CTA-1001-SAVINGS",
                         "Carlos Gómez Restrepo",
@@ -130,6 +135,7 @@ public class DataInitializer {
                 createSeedTransaction(
                         transactionRepository,
                         qrCodeService,
+                        voucherViewService,
                         "TXN-20261024-082019",
                         "CTA-4004-SAVINGS",
                         "Valentina Morales",
@@ -143,6 +149,7 @@ public class DataInitializer {
                 createSeedTransaction(
                         transactionRepository,
                         qrCodeService,
+                        voucherViewService,
                         "TXN-20261024-114255",
                         "CTA-2002-CHECKING",
                         "María Camila Rodríguez",
@@ -158,6 +165,7 @@ public class DataInitializer {
 
     private void createSeedTransaction(TransactionRepository repo,
                                        QrCodeService qrCodeService,
+                                       com.udea.banktransfer.service.VoucherViewService voucherViewService,
                                        String reference,
                                        String sourceAcc,
                                        String sourceHolder,
@@ -166,26 +174,8 @@ public class DataInitializer {
                                        BigDecimal amount,
                                        String description,
                                        LocalDateTime time) {
-        String qrPayload = String.format(
-                "BANCO TdeA - COMPROBANTE DE TRANSFERENCIA\n" +
-                "Ref: %s\n" +
-                "Fecha: %s\n" +
-                "Origen: %s (%s)\n" +
-                "Destino: %s (%s)\n" +
-                "Monto: $%,.2f COP\n" +
-                "Estado: SUCCESS\n" +
-                "Concepto: %s",
-                reference,
-                time.toString().replace('T', ' ').substring(0, 19),
-                sourceAcc,
-                sourceHolder,
-                destAcc,
-                destHolder,
-                amount,
-                description
-        );
-
-        String qrBase64 = qrCodeService.generateQrCodeBase64(qrPayload);
+        String voucherUrl = voucherViewService.getVoucherUrl(reference);
+        String qrBase64 = qrCodeService.generateQrCodeBase64(voucherUrl);
 
         Transaction transaction = new Transaction(
                 reference,
@@ -195,7 +185,7 @@ public class DataInitializer {
                 amount,
                 description,
                 TransactionStatus.SUCCESS,
-                qrPayload,
+                voucherUrl,
                 qrBase64
         );
         transaction.setTimestamp(time);

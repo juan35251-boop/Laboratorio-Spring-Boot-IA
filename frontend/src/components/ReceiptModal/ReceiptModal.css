@@ -337,6 +337,38 @@
   transition: all 0.15s ease;
 }
 
+.qr-tool-btn.primary-action {
+  background: #0284c7;
+}
+
+.qr-tool-btn.primary-action:hover {
+  background: #0369a1;
+}
+
+.qr-url-label {
+  display: block;
+  font-size: 0.74rem;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+
+.qr-url-link {
+  color: #38bdf8;
+  text-decoration: underline;
+  word-break: break-all;
+}
+
+.receipt-btn.pdf-btn {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+}
+
+.receipt-btn.pdf-btn:hover {
+  background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+}
+
 .receipt-btn.primary {
   background: #0f172a;
   color: #ffffff;

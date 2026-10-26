@@ -32,20 +32,33 @@ public class TransferServiceImpl implements TransferService {
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final QrCodeService qrCodeService;
+    private final com.udea.banktransfer.service.VoucherViewService voucherViewService;
 
     /**
-     * Constructor injection for required repositories and QR generator service.
+     * Constructor injection for required repositories, QR generator service, and voucher view service.
      *
      * @param accountRepository account repository
      * @param transactionRepository transaction repository
      * @param qrCodeService QR generator service
+     * @param voucherViewService voucher HTML rendering service
+     */
+    public TransferServiceImpl(AccountRepository accountRepository,
+                               TransactionRepository transactionRepository,
+                               QrCodeService qrCodeService,
+                               com.udea.banktransfer.service.VoucherViewService voucherViewService) {
+        this.accountRepository = accountRepository;
+        this.transactionRepository = transactionRepository;
+        this.qrCodeService = qrCodeService;
+        this.voucherViewService = voucherViewService;
+    }
+
+    /**
+     * Secondary constructor for tests and backward compatibility.
      */
     public TransferServiceImpl(AccountRepository accountRepository,
                                TransactionRepository transactionRepository,
                                QrCodeService qrCodeService) {
-        this.accountRepository = accountRepository;
-        this.transactionRepository = transactionRepository;
-        this.qrCodeService = qrCodeService;
+        this(accountRepository, transactionRepository, qrCodeService, new com.udea.banktransfer.service.VoucherViewService());
     }
 
     /**
@@ -97,39 +110,22 @@ public class TransferServiceImpl implements TransferService {
         LocalDateTime now = LocalDateTime.now();
         String formattedDate = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-        // 9. Construct readable QR code data payload
-        String qrPayload = String.format(
-                "BANCO TdeA - COMPROBANTE DE TRANSFERENCIA\n" +
-                "Ref: %s\n" +
-                "Fecha: %s\n" +
-                "Origen: %s (%s)\n" +
-                "Destino: %s (%s)\n" +
-                "Monto: $%,.2f COP\n" +
-                "Estado: %s\n" +
-                "Concepto: %s",
-                reference,
-                formattedDate,
-                sourceAccount.getAccountNumber(),
-                sourceAccount.getAccountHolder(),
-                destinationAccount.getAccountNumber(),
-                destinationAccount.getAccountHolder(),
-                request.amount(),
-                TransactionStatus.SUCCESS,
-                request.description() != null ? request.description() : "Traslado entre cuentas"
-        );
+        // 9. Construct mobile verification URL for the official PDF-styled digital voucher
+        String voucherUrl = voucherViewService.getVoucherUrl(reference);
 
-        // 10. Generate QR Base64 image
-        String qrBase64 = qrCodeService.generateQrCodeBase64(qrPayload);
+        // 10. Generate QR Base64 image encoding the mobile voucher URL
+        String qrBase64 = qrCodeService.generateQrCodeBase64(voucherUrl);
 
         // 11. Persist transaction record
         Transaction transaction = new Transaction(
                 reference,
                 sourceAccount.getAccountNumber(),
                 destinationAccount.getAccountNumber(),
+                sourceAccount.getBankName(),
                 request.amount(),
                 request.description(),
                 TransactionStatus.SUCCESS,
-                qrPayload,
+                voucherUrl,
                 qrBase64
         );
         transaction.setTimestamp(now);
@@ -150,7 +146,8 @@ public class TransferServiceImpl implements TransferService {
                 saved.getStatus(),
                 sourceAccount.getBalance(),
                 saved.getQrCodeData(),
-                saved.getQrCodeBase64()
+                saved.getQrCodeBase64(),
+                voucherUrl
         );
     }
 
@@ -193,6 +190,10 @@ public class TransferServiceImpl implements TransferService {
         String destHolder = accountRepository.findByAccountNumber(t.getDestinationAccountNumber())
                 .map(Account::getAccountHolder).orElse("Desconocido");
 
+        String voucherUrl = (t.getQrCodeData() != null && t.getQrCodeData().startsWith("http"))
+                ? t.getQrCodeData()
+                : voucherViewService.getVoucherUrl(t.getTransactionReference());
+
         return new TransferResponseDTO(
                 t.getId(),
                 t.getTransactionReference(),
@@ -207,7 +208,8 @@ public class TransferServiceImpl implements TransferService {
                 t.getStatus(),
                 null,
                 t.getQrCodeData(),
-                t.getQrCodeBase64()
+                t.getQrCodeBase64(),
+                voucherUrl
         );
     }
 }

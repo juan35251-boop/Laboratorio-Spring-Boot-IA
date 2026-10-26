@@ -36,6 +36,7 @@ export interface TransferResponse {
   sourceRemainingBalance?: number;
   qrCodeData: string;
   qrCodeBase64: string;
+  voucherUrl?: string;
 }
 
 export interface ApiError {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TransferResponse } from '../../types/bank';
-import { CheckCircle2, Download, Printer, X, QrCode, Copy, Info } from 'lucide-react';
+import { CheckCircle2, Download, Printer, X, QrCode, Copy, Info, ExternalLink, FileText } from 'lucide-react';
 import './ReceiptModal.css';
 
 interface ReceiptModalProps {
@@ -13,6 +13,8 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ receipt, onClose }) 
   const [copied, setCopied] = useState(false);
 
   if (!receipt) return null;
+
+  const voucherUrl = receipt.voucherUrl || `http://localhost:8080/api/transfers/${receipt.transactionReference}/voucher`;
 
   const formatCOP = (val: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -30,6 +32,10 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ receipt, onClose }) 
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleOpenPdfVoucher = () => {
+    window.open(voucherUrl, '_blank');
   };
 
   const handleDownloadQr = () => {
@@ -124,7 +130,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ receipt, onClose }) 
             <span>Código QR de Verificación</span>
           </div>
           <p className="qr-hint">
-            Escanea este código con cualquier lector o cámara para verificar los datos de la transferencia.
+            Al escanear este código con la cámara de tu celular se abrirá el <strong>Comprobante Oficial en formato PDF</strong> con todos los datos de la transacción.
           </p>
 
           <div className="qr-image-wrapper">
@@ -136,6 +142,10 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ receipt, onClose }) 
           </div>
 
           <div className="qr-actions-row">
+            <button type="button" className="qr-tool-btn primary-action" onClick={handleOpenPdfVoucher}>
+              <ExternalLink size={14} />
+              <span>Abrir Comprobante Digital (PDF)</span>
+            </button>
             <button type="button" className="qr-tool-btn" onClick={handleDownloadQr}>
               <Download size={14} />
               <span>Descargar QR (PNG)</span>
@@ -146,22 +156,29 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ receipt, onClose }) 
               onClick={() => setShowQrData(!showQrData)}
             >
               <Info size={14} />
-              <span>{showQrData ? 'Ocultar Datos Codificados' : 'Ver Datos Codificados'}</span>
+              <span>{showQrData ? 'Ocultar Enlace' : 'Ver Enlace QR'}</span>
             </button>
           </div>
 
           {showQrData && (
-            <pre className="qr-payload-preview">
-              <code>{receipt.qrCodeData}</code>
-            </pre>
+            <div className="qr-payload-preview">
+              <span className="qr-url-label">Enlace Codificado en el QR:</span>
+              <a href={voucherUrl} target="_blank" rel="noopener noreferrer" className="qr-url-link">
+                {voucherUrl}
+              </a>
+            </div>
           )}
         </div>
 
         {/* Footer Actions */}
         <div className="receipt-footer">
+          <button type="button" className="receipt-btn pdf-btn" onClick={handleOpenPdfVoucher}>
+            <FileText size={16} />
+            <span>Descargar Comprobante PDF</span>
+          </button>
           <button type="button" className="receipt-btn secondary" onClick={handlePrint}>
             <Printer size={16} />
-            <span>Imprimir Comprobante</span>
+            <span>Imprimir</span>
           </button>
           <button type="button" className="receipt-btn primary" onClick={onClose}>
             Finalizar

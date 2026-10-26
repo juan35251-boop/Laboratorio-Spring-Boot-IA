@@ -64,6 +64,18 @@ public record TransferResponseDTO(
         String qrCodeData,
 
         @Schema(description = "Base64 data URL for the generated QR code image (ready for <img src=...>)")
-        String qrCodeBase64
+        String qrCodeBase64,
+
+        @Schema(description = "Direct verification URL pointing to the official PDF-styled digital voucher")
+        String voucherUrl
 ) {
+    public TransferResponseDTO(Long id, String transactionReference, String sourceAccountNumber,
+                               String sourceAccountHolder, String destinationAccountNumber,
+                               String destinationAccountHolder, String bankName, BigDecimal amount,
+                               String description, LocalDateTime timestamp, TransactionStatus status,
+                               BigDecimal sourceRemainingBalance, String qrCodeData, String qrCodeBase64) {
+        this(id, transactionReference, sourceAccountNumber, sourceAccountHolder, destinationAccountNumber,
+                destinationAccountHolder, bankName, amount, description, timestamp, status,
+                sourceRemainingBalance, qrCodeData, qrCodeBase64, qrCodeData);
+    }
 }
