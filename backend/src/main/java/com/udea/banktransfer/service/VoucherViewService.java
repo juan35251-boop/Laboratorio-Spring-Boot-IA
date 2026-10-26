@@ -78,13 +78,13 @@ public class VoucherViewService {
                 ? tx.bankName()
                 : "Banco TdeA";
 
-        return """
+        String template = """
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Comprobante de Transferencia - %s</title>
+  <title>Comprobante de Transferencia - {{REF}}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -274,7 +274,7 @@ public class VoucherViewService {
     .label-col {
       color: var(--slate-500);
       font-weight: 600;
-      width: 40%%;
+      width: 40%;
     }
     .val-col {
       color: var(--slate-900);
@@ -312,8 +312,8 @@ public class VoucherViewService {
       flex-shrink: 0;
     }
     .qr-thumb img {
-      width: 100%%;
-      height: 100%%;
+      width: 100%;
+      height: 100%;
       display: block;
     }
     .qr-proof-text {
@@ -349,8 +349,8 @@ public class VoucherViewService {
       .voucher-card {
         box-shadow: none;
         border: 1px solid #cbd5e1;
-        max-width: 100%%;
-        width: 100%%;
+        max-width: 100%;
+        width: 100%;
         border-radius: 0;
         padding: 24px;
       }
@@ -368,7 +368,7 @@ public class VoucherViewService {
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
       Descargar en PDF / Imprimir
     </button>
-    <a href="http://%s:3000" class="btn btn-secondary">
+    <a href="http://{{IP}}:3000" class="btn btn-secondary">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
       Ir a la Banca Web
     </a>
@@ -381,7 +381,7 @@ public class VoucherViewService {
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>
         </div>
         <div>
-          <h1 class="brand-name">%s</h1>
+          <h1 class="brand-name">{{BANK}}</h1>
           <p class="brand-sub">Tecnológico de Antioquia — Red Bancaria</p>
         </div>
       </div>
@@ -396,43 +396,43 @@ public class VoucherViewService {
 
     <div class="amount-card">
       <span class="amount-label">Valor Trasladado</span>
-      <span class="amount-value">%s</span>
+      <span class="amount-value">{{AMOUNT}}</span>
     </div>
 
     <table class="details-table">
       <tr>
         <td class="label-col">Referencia de Operación</td>
-        <td class="val-col mono">%s</td>
+        <td class="val-col mono">{{REF}}</td>
       </tr>
       <tr>
         <td class="label-col">Fecha y Hora</td>
-        <td class="val-col">%s</td>
+        <td class="val-col">{{DATE}}</td>
       </tr>
       <tr>
         <td class="label-col">Entidad Bancaria</td>
-        <td class="val-col">%s</td>
+        <td class="val-col">{{BANK}}</td>
       </tr>
       <tr>
         <td class="label-col">Cuenta de Origen</td>
         <td class="val-col">
-          <span>%s</span>
-          <span class="holder-sub">%s</span>
+          <span>{{SOURCE_NAME}}</span>
+          <span class="holder-sub">{{SOURCE_ACC}}</span>
         </td>
       </tr>
       <tr>
         <td class="label-col">Cuenta de Destino</td>
         <td class="val-col">
-          <span>%s</span>
-          <span class="holder-sub">%s</span>
+          <span>{{DEST_NAME}}</span>
+          <span class="holder-sub">{{DEST_ACC}}</span>
         </td>
       </tr>
       <tr>
         <td class="label-col">Concepto / Motivo</td>
-        <td class="val-col">%s</td>
+        <td class="val-col">{{DESC}}</td>
       </tr>
       <tr>
         <td class="label-col">Estado del Traslado</td>
-        <td class="val-col" style="color: #059669;">%s (Completado)</td>
+        <td class="val-col" style="color: #059669;">{{STATUS}} (Completado)</td>
       </tr>
       <tr>
         <td class="label-col">Canal de Operación</td>
@@ -442,7 +442,7 @@ public class VoucherViewService {
 
     <div class="qr-proof-box">
       <div class="qr-thumb">
-        <img src="%s" alt="Código QR de Verificación">
+        <img src="{{QR_IMG}}" alt="Código QR de Verificación">
       </div>
       <div class="qr-proof-text">
         <h4 class="qr-proof-title">Sello Digital de Validación</h4>
@@ -458,21 +458,20 @@ public class VoucherViewService {
 
 </body>
 </html>
-""".formatted(
-                tx.transactionReference(),
-                getLocalNetworkIp(),
-                bankName,
-                formattedAmount,
-                tx.transactionReference(),
-                formattedDate,
-                bankName,
-                tx.sourceAccountHolder(),
-                tx.sourceAccountNumber(),
-                tx.destinationAccountHolder(),
-                tx.destinationAccountNumber(),
-                description,
-                tx.status(),
-                tx.qrCodeBase64()
-        );
+""";
+
+        return template
+                .replace("{{REF}}", tx.transactionReference())
+                .replace("{{IP}}", getLocalNetworkIp())
+                .replace("{{BANK}}", bankName)
+                .replace("{{AMOUNT}}", formattedAmount)
+                .replace("{{DATE}}", formattedDate)
+                .replace("{{SOURCE_NAME}}", tx.sourceAccountHolder())
+                .replace("{{SOURCE_ACC}}", tx.sourceAccountNumber())
+                .replace("{{DEST_NAME}}", tx.destinationAccountHolder())
+                .replace("{{DEST_ACC}}", tx.destinationAccountNumber())
+                .replace("{{DESC}}", description)
+                .replace("{{STATUS}}", tx.status() != null ? tx.status().name() : "SUCCESS")
+                .replace("{{QR_IMG}}", tx.qrCodeBase64() != null ? tx.qrCodeBase64() : "");
     }
 }

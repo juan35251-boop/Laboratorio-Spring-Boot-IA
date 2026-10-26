@@ -42,6 +42,7 @@ public class TransferServiceImpl implements TransferService {
      * @param qrCodeService QR generator service
      * @param voucherViewService voucher HTML rendering service
      */
+    @org.springframework.beans.factory.annotation.Autowired
     public TransferServiceImpl(AccountRepository accountRepository,
                                TransactionRepository transactionRepository,
                                QrCodeService qrCodeService,

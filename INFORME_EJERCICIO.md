@@ -222,6 +222,13 @@ A continuación se detalla el conjunto ordenado de **prompts** utilizados durant
 > **Prompt 12 (Suite de Tests con JUnit 5 y Mockito):**  
 > *"Crea una suite de pruebas unitarias para TransferServiceTest utilizando JUnit 5 y Mockito. Debe comprobar: ejecución de transferencia exitosa con actualización de saldos y generación de QR, rechazo por saldo insuficiente, rechazo por cuenta de origen igual a cuenta de destino y rechazo por cuenta inexistente."*
 
+### Fase 8: Persistencia, Comprobante Digital PDF y Escaneo Móvil de Código QR
+> **Prompt 13 (Persistencia de Datos e Histórico en Disco):**  
+> *"El histórico de transacciones y las cuentas deben persistir entre reinicios del programa usando base de datos H2 basada en archivo (`./data/bank_transfer_db`). Carga datos de prueba realistas (cuentas activas y transacciones previas con sus respectivos códigos QR generados) para que el histórico y la búsqueda por banco muestren información desde el primer arranque."*
+
+> **Prompt 14 (Comprobante Digital Oficial y Código QR Estilo PDF):**  
+> *"Al escanear el código QR con la cámara de un teléfono móvil, no se debe mostrar texto plano desordenado, sino abrir el comprobante oficial de la transferencia exactamente igual a cuando se descarga el comprobante bancario en PDF. Implementa un servicio de comprobante digital que detecte la IP de red local del equipo (`http://<IP_LOCAL>:8080/api/transfers/{ref}/voucher`), codifique dicho enlace en el código QR generado por ZXing, y proporcione un diseño web responsivo con estilos de impresión bancaria (@media print), botón de 'Descargar en PDF / Imprimir', logotipo del Banco TdeA, sello de validación digital y datos completos de la operación."*
+
 ---
 
 ## 8. RESULTADOS Y PRUEBAS REALIZADAS
@@ -247,8 +254,15 @@ Al ejecutar `mvn clean test` en el backend, se verificaron todos los casos de pr
 3. **Caso 3: Cuentas Idénticas:**
    - Origen: `CTA-1001-SAVINGS`, Destino: `CTA-1001-SAVINGS`
    - **Resultado:** Código HTTP `400 Bad Request`. Mensaje: *"Source and destination accounts cannot be identical."*
-4. **Caso 4: Verificación y Descarga del Código QR:**
-   - El código QR en el comprobante fue probado exitosamente con lectores ópticos y cámaras de dispositivos móviles, extrayendo la información íntegra del comprobante (Referencia, Fecha, Titulares, Cuentas, Monto y Estado APROBADA).
+4. **Caso 4: Verificación, Escaneo de QR y Comprobante PDF:**
+   - Al escanear el código QR con cualquier dispositivo móvil (iOS / Android) conectado a la misma red Wi-Fi o desde el navegador de la aplicación web, el código direcciona automáticamente al comprobante digital oficial emitido por el backend (`/api/transfers/{ref}/voucher`).
+   - El comprobante renderiza una interfaz oficial bancaria del Banco TdeA idéntica a un extracto/recibo PDF bancario oficial, incluyendo:
+     * Encabezado institucional y distintivo de estado APROBADO.
+     * Monto destacado formateado en pesos colombianos ($ COP).
+     * Referencia única, fecha y hora exacta, y canal de operación.
+     * Datos completos de cuenta de origen y destino con sus respectivos titulares.
+     * Concepto de la transferencia y sello digital de validación con el código QR.
+     * Botón funcional "Descargar en PDF / Imprimir" con estilos de hoja A4 (`@media print`) y botón "Compartir Enlace".
 
 ---
 
