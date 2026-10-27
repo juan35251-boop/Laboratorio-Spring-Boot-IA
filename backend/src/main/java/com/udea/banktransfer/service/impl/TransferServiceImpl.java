@@ -111,28 +111,63 @@ public class TransferServiceImpl implements TransferService {
         LocalDateTime now = LocalDateTime.now();
         String formattedDate = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-        // 9. Construct mobile verification URL for the official PDF-styled digital voucher
+        // 9. Resolve bank entity and voucher verification URL
+        String bankName = (sourceAccount.getBankName() != null && !sourceAccount.getBankName().isBlank())
+                ? sourceAccount.getBankName()
+                : "Banco TdeA";
+
+        String description = (request.description() != null && !request.description().isBlank())
+                ? request.description().trim()
+                : "Traslado de fondos entre cuentas";
+
         String voucherUrl = voucherViewService.getVoucherUrl(reference);
 
-        // 10. Generate QR Base64 image encoding the mobile voucher URL
-        String qrBase64 = qrCodeService.generateQrCodeBase64(voucherUrl);
+        // 10. Construct complete structured payload with all basic transaction data encoded (Requisito Taller)
+        String qrContent = String.format(
+                """
+                === BANCO TdeA - TRASLADO DE DINERO ===
+                Referencia: %s
+                Fecha y Hora: %s
+                Entidad Bancaria: %s
+                Cuenta Origen: %s (%s)
+                Cuenta Destino: %s (%s)
+                Monto Transferido: $ %,.2f COP
+                Concepto: %s
+                Estado: %s (APROBADA)
+                Comprobante Oficial PDF: %s
+                """.trim(),
+                reference,
+                formattedDate,
+                bankName,
+                sourceAccount.getAccountNumber(),
+                sourceAccount.getAccountHolder(),
+                destinationAccount.getAccountNumber(),
+                destinationAccount.getAccountHolder(),
+                request.amount(),
+                description,
+                TransactionStatus.SUCCESS,
+                voucherUrl
+        );
 
-        // 11. Persist transaction record
+        // 11. Generate QR Code image encoding all basic transaction data
+        String qrBase64 = qrCodeService.generateQrCodeBase64(qrContent);
+
+        // 12. Persist transaction record
         Transaction transaction = new Transaction(
                 reference,
                 sourceAccount.getAccountNumber(),
                 destinationAccount.getAccountNumber(),
-                sourceAccount.getBankName(),
+                bankName,
                 request.amount(),
-                request.description(),
+                description,
                 TransactionStatus.SUCCESS,
-                voucherUrl,
+                qrContent,
                 qrBase64
         );
         transaction.setTimestamp(now);
         Transaction saved = transactionRepository.save(transaction);
 
-        // 12. Return full response DTO
+        // 13. Return full response DTO
         return new TransferResponseDTO(
                 saved.getId(),
                 saved.getTransactionReference(),

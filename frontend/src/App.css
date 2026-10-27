@@ -5,6 +5,9 @@
   --primary-dark: #047857;
   --slate-900: #0f172a;
   --slate-800: #1e293b;
+  --slate-700: #334155;
+  --slate-600: #475569;
+  --slate-500: #64748b;
   --slate-100: #f1f5f9;
   --slate-50: #f8fafc;
 }
@@ -24,13 +27,105 @@ body {
 }
 
 .main-content {
-  max-width: 1280px;
+  max-width: 1320px;
   width: 100%;
   margin: 0 auto;
-  padding: 28px 24px 60px 24px;
+  padding: 24px 24px 60px 24px;
   box-sizing: border-box;
 }
 
+/* Executive Metrics Banner */
+.executive-banner {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.metric-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+}
+
+.metric-box:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+}
+
+.metric-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.metric-icon-wrap.emerald {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.metric-icon-wrap.blue {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.metric-icon-wrap.indigo {
+  background: #eef2ff;
+  color: #4f46e5;
+  border: 1px solid #c7d2fe;
+}
+
+.metric-icon-wrap.purple {
+  background: #faf5ff;
+  color: #7c3aed;
+  border: 1px solid #e9d5ff;
+}
+
+.metric-text-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metric-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.metric-value {
+  font-family: var(--font-mono, monospace);
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.metric-value.text-emerald {
+  color: #059669;
+}
+
+.metric-sub {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* Action Grid */
 .action-grid {
   display: grid;
   grid-template-columns: 460px 1fr;
@@ -38,8 +133,25 @@ body {
   align-items: flex-start;
 }
 
-@media (max-width: 1024px) {
+.form-column,
+.history-column {
+  min-width: 0;
+}
+
+@media (max-width: 1120px) {
   .action-grid {
     grid-template-columns: 1fr;
+  }
+  .executive-banner {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .executive-banner {
+    grid-template-columns: 1fr;
+  }
+  .main-content {
+    padding: 16px 14px 40px 14px;
   }
 }

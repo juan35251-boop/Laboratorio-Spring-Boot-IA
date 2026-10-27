@@ -175,7 +175,31 @@ public class DataInitializer {
                                        String description,
                                        LocalDateTime time) {
         String voucherUrl = voucherViewService.getVoucherUrl(reference);
-        String qrBase64 = qrCodeService.generateQrCodeBase64(voucherUrl);
+        String formattedDate = time.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String qrContent = String.format(
+                """
+                === BANCO TdeA - TRASLADO DE DINERO ===
+                Referencia: %s
+                Fecha y Hora: %s
+                Entidad Bancaria: Banco TdeA
+                Cuenta Origen: %s (%s)
+                Cuenta Destino: %s (%s)
+                Monto Transferido: $ %,.2f COP
+                Concepto: %s
+                Estado: SUCCESS (APROBADA)
+                Comprobante Oficial PDF: %s
+                """.trim(),
+                reference,
+                formattedDate,
+                sourceAcc,
+                sourceHolder,
+                destAcc,
+                destHolder,
+                amount,
+                description,
+                voucherUrl
+        );
+        String qrBase64 = qrCodeService.generateQrCodeBase64(qrContent);
 
         Transaction transaction = new Transaction(
                 reference,
@@ -185,7 +209,7 @@ public class DataInitializer {
                 amount,
                 description,
                 TransactionStatus.SUCCESS,
-                voucherUrl,
+                qrContent,
                 qrBase64
         );
         transaction.setTimestamp(time);

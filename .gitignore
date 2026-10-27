@@ -57,3 +57,4 @@ frontend/build/
 *.trace.db
 *.mv.db
 data/
+backend/data/

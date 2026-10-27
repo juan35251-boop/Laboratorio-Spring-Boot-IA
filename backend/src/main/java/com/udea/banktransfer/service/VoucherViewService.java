@@ -330,6 +330,39 @@ public class VoucherViewService {
       color: var(--slate-500);
       line-height: 1.35;
     }
+    .encoded-summary-card {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 20px;
+    }
+    .encoded-badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: #047857;
+      background: #d1fae5;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    .encoded-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 12px;
+      font-size: 0.76rem;
+      color: #334155;
+    }
+    .encoded-grid strong {
+      color: #0f172a;
+    }
+    @media (max-width: 480px) {
+      .encoded-grid {
+        grid-template-columns: 1fr;
+      }
+    }
     .security-footer {
       border-top: 1px solid var(--border);
       padding-top: 14px;
@@ -445,8 +478,20 @@ public class VoucherViewService {
         <img src="{{QR_IMG}}" alt="Código QR de Verificación">
       </div>
       <div class="qr-proof-text">
-        <h4 class="qr-proof-title">Sello Digital de Validación</h4>
-        <p class="qr-proof-desc">Este comprobante electrónico cuenta con certificación digital de no repudio conforme a los estándares bancarios del sistema.</p>
+        <h4 class="qr-proof-title">Sello Digital y Código QR</h4>
+        <p class="qr-proof-desc">Contiene codificados los datos básicos de la transacción (Referencia, Cuentas, Monto, Fecha y Validación Oficial).</p>
+      </div>
+    </div>
+
+    <div class="encoded-summary-card">
+      <div class="encoded-badge">DATOS BÁSICOS CODIFICADOS EN EL QR (REQUISITO TALLER)</div>
+      <div class="encoded-grid">
+        <div><strong>Referencia:</strong> {{REF}}</div>
+        <div><strong>Monto:</strong> {{AMOUNT}}</div>
+        <div><strong>Cuenta Origen:</strong> {{SOURCE_ACC}} ({{SOURCE_NAME}})</div>
+        <div><strong>Cuenta Destino:</strong> {{DEST_ACC}} ({{DEST_NAME}})</div>
+        <div><strong>Fecha y Hora:</strong> {{DATE}}</div>
+        <div><strong>Estado:</strong> {{STATUS}} (Aprobada)</div>
       </div>
     </div>
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import confetti from 'canvas-confetti';
 import { Navbar } from './components/Navbar/Navbar';
 import { AccountCards } from './components/AccountCards/AccountCards';
@@ -9,6 +9,12 @@ import { Toast, ToastMessage } from './components/Toast/Toast';
 import { TransferService } from './services/transferService';
 import { Account, TransferRequest, TransferResponse } from './types/bank';
 import axios from 'axios';
+import {
+  TrendingUp,
+  ShieldCheck,
+  QrCode,
+  CircleDollarSign
+} from 'lucide-react';
 import './App.css';
 
 export const App: React.FC = () => {
@@ -58,9 +64,30 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     loadData();
-    const interval = setInterval(loadData, 15000); // Polling every 15s to keep sync
+    const interval = setInterval(loadData, 15000);
     return () => clearInterval(interval);
   }, [loadData]);
+
+  // Executive Dashboard Metrics
+  const metrics = useMemo(() => {
+    const totalCustody = accounts.reduce((sum, a) => sum + a.balance, 0);
+    const totalVolume = transactions.reduce((sum, t) => sum + (t.status === 'SUCCESS' ? t.amount : 0), 0);
+    return {
+      totalCustody,
+      totalVolume,
+      txCount: transactions.length,
+      accountsCount: accounts.length,
+    };
+  }, [accounts, transactions]);
+
+  const formatCOP = (val: number) => {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(val);
+  };
 
   const handleExecuteTransfer = async (payload: TransferRequest) => {
     setLoading(true);
@@ -73,21 +100,21 @@ export const App: React.FC = () => {
       // Launch celebration confetti
       try {
         confetti({
-          particleCount: 70,
-          spread: 60,
+          particleCount: 80,
+          spread: 70,
           origin: { y: 0.6 },
         });
       } catch (e) {
-        // ignore if canvas not supported
+        // ignore
       }
 
       addToast(
         'success',
         '¡Transferencia Exitosa!',
-        `Se trasladaron $${payload.amount.toLocaleString('es-CO')} COP a la cuenta ${payload.destinationAccountNumber}.`
+        `Se trasladaron ${formatCOP(payload.amount)} con código QR codificado generado.`
       );
 
-      // Display the receipt modal with QR Code
+      // Display the receipt modal with QR Code and encoded data
       setActiveReceipt(response);
     } catch (err: unknown) {
       let errorMsg = 'No fue posible completar la transferencia.';
@@ -118,6 +145,53 @@ export const App: React.FC = () => {
       <Toast toasts={toasts} onDismiss={removeToast} />
 
       <main className="main-content">
+        {/* Executive Metrics Dashboard Banner */}
+        <section className="executive-banner">
+          <div className="metric-box">
+            <div className="metric-icon-wrap emerald">
+              <CircleDollarSign size={20} />
+            </div>
+            <div className="metric-text-wrap">
+              <span className="metric-title">Saldo en Custodia</span>
+              <span className="metric-value">{formatCOP(metrics.totalCustody)}</span>
+              <span className="metric-sub">{metrics.accountsCount} Cuentas bancarias activas</span>
+            </div>
+          </div>
+
+          <div className="metric-box">
+            <div className="metric-icon-wrap blue">
+              <TrendingUp size={20} />
+            </div>
+            <div className="metric-text-wrap">
+              <span className="metric-title">Volumen Total Trasladado</span>
+              <span className="metric-value">{formatCOP(metrics.totalVolume)}</span>
+              <span className="metric-sub">Fondos movilizados en el sistema</span>
+            </div>
+          </div>
+
+          <div className="metric-box">
+            <div className="metric-icon-wrap indigo">
+              <QrCode size={20} />
+            </div>
+            <div className="metric-text-wrap">
+              <span className="metric-title">Comprobantes & QR</span>
+              <span className="metric-value">{metrics.txCount} Operaciones</span>
+              <span className="metric-sub">Datos codificados en servidor</span>
+            </div>
+          </div>
+
+          <div className="metric-box">
+            <div className="metric-icon-wrap purple">
+              <ShieldCheck size={20} />
+            </div>
+            <div className="metric-text-wrap">
+              <span className="metric-title">Seguridad Bancaria</span>
+              <span className="metric-value text-emerald">100% Auditado</span>
+              <span className="metric-sub">Base de datos H2 persistente</span>
+            </div>
+          </div>
+        </section>
+
         {/* Account Balance Cards */}
         <AccountCards
           accounts={accounts}
@@ -153,7 +227,7 @@ export const App: React.FC = () => {
         </div>
       </main>
 
-      {/* Official Voucher / Receipt Modal with QR Code */}
+      {/* Official Voucher / Receipt Modal with QR Code and Encoded Data */}
       <ReceiptModal receipt={activeReceipt} onClose={() => setActiveReceipt(null)} />
     </div>
   );

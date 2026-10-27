@@ -1,6 +1,21 @@
 import React, { useState } from 'react';
 import { TransferResponse } from '../../types/bank';
-import { CheckCircle2, Download, Printer, X, QrCode, Copy, Info, ExternalLink, FileText } from 'lucide-react';
+import {
+  CheckCircle2,
+  Download,
+  Printer,
+  X,
+  QrCode,
+  Copy,
+  ExternalLink,
+  FileText,
+  Layers,
+  Code2,
+  FileJson,
+  ShieldCheck,
+  Landmark,
+  ArrowRight
+} from 'lucide-react';
 import './ReceiptModal.css';
 
 interface ReceiptModalProps {
@@ -9,12 +24,16 @@ interface ReceiptModalProps {
 }
 
 export const ReceiptModal: React.FC<ReceiptModalProps> = ({ receipt, onClose }) => {
-  const [showQrData, setShowQrData] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<'structured' | 'raw' | 'json'>('structured');
+  const [copiedRef, setCopiedRef] = useState(false);
+  const [copiedPayload, setCopiedPayload] = useState(false);
+  const [copiedJson, setCopiedJson] = useState(false);
 
   if (!receipt) return null;
 
-  const voucherUrl = receipt.voucherUrl || `http://localhost:8080/api/transfers/${receipt.transactionReference}/voucher`;
+  const voucherUrl =
+    receipt.voucherUrl ||
+    `http://localhost:8080/api/transfers/${receipt.transactionReference}/voucher`;
 
   const formatCOP = (val: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -26,8 +45,43 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ receipt, onClose }) 
 
   const handleCopyRef = () => {
     navigator.clipboard.writeText(receipt.transactionReference);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setCopiedRef(true);
+    setTimeout(() => setCopiedRef(false), 2000);
+  };
+
+  const handleCopyPayload = () => {
+    navigator.clipboard.writeText(receipt.qrCodeData);
+    setCopiedPayload(true);
+    setTimeout(() => setCopiedPayload(false), 2000);
+  };
+
+  const jsonPayload = JSON.stringify(
+    {
+      bank: receipt.bankName || 'Banco TdeA',
+      transactionReference: receipt.transactionReference,
+      timestamp: receipt.timestamp,
+      amount: receipt.amount,
+      currency: 'COP',
+      status: receipt.status,
+      sourceAccount: {
+        number: receipt.sourceAccountNumber,
+        holder: receipt.sourceAccountHolder,
+      },
+      destinationAccount: {
+        number: receipt.destinationAccountNumber,
+        holder: receipt.destinationAccountHolder,
+      },
+      description: receipt.description || 'Traslado de fondos entre cuentas',
+      voucherVerificationUrl: voucherUrl,
+    },
+    null,
+    2
+  );
+
+  const handleCopyJson = () => {
+    navigator.clipboard.writeText(jsonPayload);
+    setCopiedJson(true);
+    setTimeout(() => setCopiedJson(false), 2000);
   };
 
   const handlePrint = () => {
@@ -59,78 +113,60 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ receipt, onClose }) 
           <div className="success-badge-ring">
             <CheckCircle2 size={36} className="success-check-icon" />
           </div>
-          <h2 className="receipt-title">¡Transferencia Exitosa!</h2>
-          <p className="receipt-subtitle">Comprobante de operación bancaria en línea</p>
+          <span className="receipt-tagline">Comprobante Oficial de Traslado</span>
+          <h2 className="receipt-title">¡Operación Exitosa!</h2>
+          <div className="ref-badge-row">
+            <span className="ref-label">Referencia:</span>
+            <span className="ref-code">{receipt.transactionReference}</span>
+            <button className="ref-copy-btn" onClick={handleCopyRef} title="Copiar referencia">
+              <Copy size={13} />
+              {copiedRef && <span className="copied-bubble">¡Copiado!</span>}
+            </button>
+          </div>
         </div>
 
         {/* Amount Highlight */}
         <div className="receipt-amount-card">
           <span className="amount-caption">Valor Trasladado</span>
           <span className="amount-number">{formatCOP(receipt.amount)}</span>
-          <span className="amount-status-badge">APROBADA • {receipt.status}</span>
+          <div className="amount-badges">
+            <span className="badge-status-approved">
+              <ShieldCheck size={13} />
+              TRANSACCIÓN APROBADA
+            </span>
+            <span className="badge-bank-name">
+              <Landmark size={13} />
+              {receipt.bankName || 'Banco TdeA'}
+            </span>
+          </div>
         </div>
 
-        {/* Receipt Body Details */}
-        <div className="receipt-details-list">
-          <div className="detail-row">
-            <span className="detail-label">Referencia</span>
-            <div className="detail-value-with-copy">
-              <span className="mono-text">{receipt.transactionReference}</span>
-              <button
-                className="copy-mini-btn"
-                onClick={handleCopyRef}
-                title="Copiar referencia"
-              >
-                <Copy size={13} />
-                {copied && <span className="copied-tooltip">¡Copiado!</span>}
-              </button>
-            </div>
+        {/* Transfer Visual Route */}
+        <div className="transfer-route-box">
+          <div className="route-node">
+            <span className="route-node-label">Origen</span>
+            <span className="route-node-holder">{receipt.sourceAccountHolder}</span>
+            <span className="route-node-acc">{receipt.sourceAccountNumber}</span>
           </div>
-
-          <div className="detail-row">
-            <span className="detail-label">Fecha y Hora</span>
-            <span className="detail-value">{new Date(receipt.timestamp).toLocaleString('es-CO')}</span>
+          <div className="route-arrow">
+            <ArrowRight size={20} />
           </div>
-
-          <div className="detail-row">
-            <span className="detail-label">Cuenta Origen</span>
-            <div className="detail-account-col">
-              <span className="detail-account-name">{receipt.sourceAccountHolder}</span>
-              <span className="mono-subtext">{receipt.sourceAccountNumber}</span>
-            </div>
+          <div className="route-node">
+            <span className="route-node-label">Destino</span>
+            <span className="route-node-holder">{receipt.destinationAccountHolder}</span>
+            <span className="route-node-acc">{receipt.destinationAccountNumber}</span>
           </div>
-
-          <div className="detail-row">
-            <span className="detail-label">Cuenta Destino</span>
-            <div className="detail-account-col">
-              <span className="detail-account-name">{receipt.destinationAccountHolder}</span>
-              <span className="mono-subtext">{receipt.destinationAccountNumber}</span>
-            </div>
-          </div>
-
-          <div className="detail-row">
-            <span className="detail-label">Concepto</span>
-            <span className="detail-value">{receipt.description || 'Traslado entre cuentas'}</span>
-          </div>
-
-          {receipt.sourceRemainingBalance !== undefined && receipt.sourceRemainingBalance !== null && (
-            <div className="detail-row highlight-balance">
-              <span className="detail-label">Nuevo Saldo Origen</span>
-              <span className="detail-value mono-text font-bold">
-                {formatCOP(receipt.sourceRemainingBalance)}
-              </span>
-            </div>
-          )}
         </div>
 
         {/* QR Code Section */}
         <div className="receipt-qr-section">
           <div className="qr-badge-title">
             <QrCode size={18} />
-            <span>Código QR de Verificación</span>
+            <span>Código QR Oficial de la Transacción</span>
           </div>
           <p className="qr-hint">
-            Al escanear este código con la cámara de tu celular se abrirá el <strong>Comprobante Oficial en formato PDF</strong> con todos los datos de la transacción.
+            Este código QR contiene <strong>los datos básicos de la transacción codificados</strong>{' '}
+            conforme a los requerimientos del taller y el enlace de validación bancaria.
           </p>
 
           <div className="qr-image-wrapper">
@@ -142,30 +178,140 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ receipt, onClose }) 
           </div>
 
           <div className="qr-actions-row">
-            <button type="button" className="qr-tool-btn primary-action" onClick={handleOpenPdfVoucher}>
+            <button
+              type="button"
+              className="qr-tool-btn primary-action"
+              onClick={handleOpenPdfVoucher}
+            >
               <ExternalLink size={14} />
               <span>Abrir Comprobante Digital (PDF)</span>
             </button>
             <button type="button" className="qr-tool-btn" onClick={handleDownloadQr}>
               <Download size={14} />
-              <span>Descargar QR (PNG)</span>
-            </button>
-            <button
-              type="button"
-              className="qr-tool-btn outline"
-              onClick={() => setShowQrData(!showQrData)}
-            >
-              <Info size={14} />
-              <span>{showQrData ? 'Ocultar Enlace' : 'Ver Enlace QR'}</span>
+              <span>Descargar Imagen QR (PNG)</span>
             </button>
           </div>
+        </div>
 
-          {showQrData && (
-            <div className="qr-payload-preview">
-              <span className="qr-url-label">Enlace Codificado en el QR:</span>
-              <a href={voucherUrl} target="_blank" rel="noopener noreferrer" className="qr-url-link">
-                {voucherUrl}
-              </a>
+        {/* Encoded Transaction Data Inspector (Teacher Requirement) */}
+        <div className="encoded-inspector">
+          <div className="inspector-header">
+            <div className="inspector-title">
+              <Layers size={16} />
+              <span>Datos Básicos Codificados de la Transacción</span>
+            </div>
+            <div className="inspector-tabs">
+              <button
+                type="button"
+                className={`tab-btn ${activeTab === 'structured' ? 'active' : ''}`}
+                onClick={() => setActiveTab('structured')}
+              >
+                <Layers size={13} />
+                <span>Campos</span>
+              </button>
+              <button
+                type="button"
+                className={`tab-btn ${activeTab === 'raw' ? 'active' : ''}`}
+                onClick={() => setActiveTab('raw')}
+              >
+                <Code2 size={13} />
+                <span>Texto QR</span>
+              </button>
+              <button
+                type="button"
+                className={`tab-btn ${activeTab === 'json' ? 'active' : ''}`}
+                onClick={() => setActiveTab('json')}
+              >
+                <FileJson size={13} />
+                <span>JSON</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Tab 1: Structured Fields */}
+          {activeTab === 'structured' && (
+            <div className="structured-grid">
+              <div className="field-item">
+                <span className="field-label">Referencia</span>
+                <span className="field-value mono">{receipt.transactionReference}</span>
+              </div>
+              <div className="field-item">
+                <span className="field-label">Fecha y Hora</span>
+                <span className="field-value">
+                  {new Date(receipt.timestamp).toLocaleString('es-CO')}
+                </span>
+              </div>
+              <div className="field-item">
+                <span className="field-label">Entidad Bancaria</span>
+                <span className="field-value">{receipt.bankName || 'Banco TdeA'}</span>
+              </div>
+              <div className="field-item">
+                <span className="field-label">Valor Trasladado</span>
+                <span className="field-value text-emerald">{formatCOP(receipt.amount)}</span>
+              </div>
+              <div className="field-item">
+                <span className="field-label">Cuenta y Titular Origen</span>
+                <span className="field-value">
+                  {receipt.sourceAccountNumber} — {receipt.sourceAccountHolder}
+                </span>
+              </div>
+              <div className="field-item">
+                <span className="field-label">Cuenta y Titular Destino</span>
+                <span className="field-value">
+                  {receipt.destinationAccountNumber} — {receipt.destinationAccountHolder}
+                </span>
+              </div>
+              <div className="field-item full-width">
+                <span className="field-label">Concepto / Motivo</span>
+                <span className="field-value">
+                  {receipt.description || 'Traslado entre cuentas'}
+                </span>
+              </div>
+              <div className="field-item">
+                <span className="field-label">Estado</span>
+                <span className="field-value status-approved-text">
+                  {receipt.status} (APROBADA)
+                </span>
+              </div>
+              <div className="field-item">
+                <span className="field-label">Comprobante Digital</span>
+                <a
+                  href={voucherUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="field-link"
+                >
+                  Ver PDF en línea →
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* Tab 2: Raw Text Encoded in QR */}
+          {activeTab === 'raw' && (
+            <div className="code-viewer-wrap">
+              <div className="viewer-toolbar">
+                <span className="toolbar-caption">Payload de texto codificado en el QR:</span>
+                <button type="button" className="copy-code-btn" onClick={handleCopyPayload}>
+                  <Copy size={13} />
+                  <span>{copiedPayload ? '¡Copiado!' : 'Copiar Texto'}</span>
+                </button>
+              </div>
+              <pre className="code-block">{receipt.qrCodeData}</pre>
+            </div>
+          )}
+
+          {/* Tab 3: Structured JSON */}
+          {activeTab === 'json' && (
+            <div className="code-viewer-wrap">
+              <div className="viewer-toolbar">
+                <span className="toolbar-caption">Estructura JSON (Open Banking):</span>
+                <button type="button" className="copy-code-btn" onClick={handleCopyJson}>
+                  <Copy size={13} />
+                  <span>{copiedJson ? '¡Copiado!' : 'Copiar JSON'}</span>
+                </button>
+              </div>
+              <pre className="code-block json">{jsonPayload}</pre>
             </div>
           )}
         </div>

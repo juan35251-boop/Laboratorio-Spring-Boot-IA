@@ -229,6 +229,9 @@ A continuación se detalla el conjunto ordenado de **prompts** utilizados durant
 > **Prompt 14 (Comprobante Digital Oficial y Código QR Estilo PDF):**  
 > *"Al escanear el código QR con la cámara de un teléfono móvil, no se debe mostrar texto plano desordenado, sino abrir el comprobante oficial de la transferencia exactamente igual a cuando se descarga el comprobante bancario en PDF. Implementa un servicio de comprobante digital que detecte la IP de red local del equipo (`http://<IP_LOCAL>:8080/api/transfers/{ref}/voucher`), codifique dicho enlace en el código QR generado por ZXing, y proporcione un diseño web responsivo con estilos de impresión bancaria (@media print), botón de 'Descargar en PDF / Imprimir', logotipo del Banco TdeA, sello de validación digital y datos completos de la operación."*
 
+> **Prompt 15 (Datos Básicos de la Transacción Codificados e Innovación UX Fintech):**  
+> *"El requerimiento del documento estipula explícitamente: 'código QR con los datos básicos de la transacción codificados'. Asegura que el código QR codifique estructuralmente todos los datos básicos (Referencia, Fecha, Entidad Bancaria, Cuentas y Titulares de Origen y Destino, Monto COP, Concepto y Estado Aprobada) junto con el enlace de comprobante digital. En el modal del comprobante, añade un inspector interactivo con 3 pestañas: Desglose de Campos Bancarios, Payload Texto Codificado en QR (con botón de copia rápida) y Estructura JSON estándar (Open Banking). Adicionalmente, eleva integralmente la experiencia de usuario (UX) del frontend: añade un Banner Ejecutivo con KPIs en tiempo real (Saldo total en custodia, Volumen transferido, Operaciones auditadas), rediseña las tarjetas de cuentas como tarjetas débito fintech con chip y simulación contactless, añade un simulador de saldo disponible en tiempo real con botones de porcentaje (25%, 50%, Max), botón de intercambio rápido de cuentas origen/destino (Swap), chips de conceptos sugeridos, filtros rápidos en el historial y exportación instantánea del historial auditado a archivo CSV/Excel."*
+
 ---
 
 ## 8. RESULTADOS Y PRUEBAS REALIZADAS
@@ -263,6 +266,17 @@ Al ejecutar `mvn clean test` en el backend, se verificaron todos los casos de pr
      * Datos completos de cuenta de origen y destino con sus respectivos titulares.
      * Concepto de la transferencia y sello digital de validación con el código QR.
      * Botón funcional "Descargar en PDF / Imprimir" con estilos de hoja A4 (`@media print`) y botón "Compartir Enlace".
+5. **Caso 5: Inspección de Datos Básicos Codificados y Métricas UX:**
+   - En el modal de comprobante (`ReceiptModal`), el usuario puede alternar entre 3 visores de datos codificados:
+     * **Campos estructurados**: Ficha detallada con referencia, cuentas, nombres, monto COP y estado.
+     * **Texto Plano en QR**: Payload multilínea exacto codificado en la matriz del QR con botón de copia con 1 clic.
+     * **JSON Open Banking**: Objeto JSON estándar normalizado con botón de copia.
+   - En la interfaz general, el usuario cuenta con:
+     * Banner ejecutivo superior con métricas financieras consolidadas (Saldo en custodia, Volumen transferido, Transacciones).
+     * Tarjetas fintech con micro-interacciones (chip EMV, NFC, enmascaramiento con botón de visualización).
+     * Simulador de saldo en el formulario con cálculo dinámico del nuevo saldo antes del envío y botones de porcentaje (25%, 50%, Max).
+     * Botón de inversión instantánea de cuentas (Swap Origen/Destino).
+     * Exportación del historial completo a formato CSV compatible con Microsoft Excel.
 
 ---
 
