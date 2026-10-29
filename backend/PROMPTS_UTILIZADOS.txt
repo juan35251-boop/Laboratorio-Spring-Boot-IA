@@ -1,0 +1,200 @@
+================================================================================
+          TECNOLOGICO DE ANTIOQUIA - INSTITUCION UNIVERSITARIA
+                         FACULTAD DE INGENIERIA
+            ASIGNATURA: DISENO DEL SISTEMA / LABORATORIO SPRING BOOT + IA
+================================================================================
+PROYECTO:   SISTEMA DE TRASLADO DE DINERO ENTRE CUENTAS EN UN BANCO
+            CON HISTORICO DE TRANSACCIONES Y CODIGO QR
+FECHA:      OCTUBRE DE 2026
+DOCUMENTO:  PROMPTS UTILIZADOS PARA LA CREACION DEL PROYECTO
+            (ADAPTACION DE LA GUIA DE CLASE AL EJERCICIO PROPUESTO)
+================================================================================
+
+Este documento contiene los 10 prompts de la guia de clase del profesor adaptados
+exactamente al ejercicio propuesto de traslado de dinero entre cuentas bancarias,
+con los nombres de bases de datos, entidades, atributos y requerimientos de este
+proyecto, de forma clara, sencilla y directa.
+
+================================================================================
+PROMPT 1: REGLAS DEL PROYECTO PARA CURSOR / ANTIGRAVITY (MDC)
+================================================================================
+Crea un archivo de reglas para cursor (mdc) llamado 'springboot' que 
+siempre se aplique, con las buenas practicas de Java en el desarrollo 
+de un servicio en spring boot para que las aplique en el desarrollo del 
+proyecto.
+Ten en cuenta que los nombres de clases, metodos y atributos deben ser en 
+ingles.
+Cada metodo publico debe tener su documentacion Javadoc actualizada.
+Para los DTO usamos java records.
+Agrega la estructura actual del proyecto dentro de las reglas.
+
+
+================================================================================
+PROMPT 2: CONFIGURACION DE BASE DE DATOS (application.properties)
+================================================================================
+Crea la configuracion para la conexion a la base de datos postgresql de 
+nombre 'bank_transfer_db' con el usuario 'postgres' y contrasena 'root'.
+Habilita la actualizacion del esquema automatico en hibernate, el 
+dialecto JPA e imprime las sentencias sql de JPA en consola.
+Ademas deja configurada la base de datos H2 para pruebas locales faciles.
+
+
+================================================================================
+PROMPT 3: GENERAR LOS ENTITY BEANS (Entidades JPA)
+================================================================================
+Crea las entidades JPA que representen una cuenta bancaria y una transaccion:
+
+1. Entidad Account (para las cuentas bancarias):
+- id: Long, clave primaria autogenerada
+- accountNumber: String, numero de cuenta unico
+- accountHolder: String, nombre del titular de la cuenta
+- bankName: String, nombre del banco ('Banco TdeA')
+- accountType: un enum con valores SAVINGS y CHECKING
+- balance: BigDecimal, saldo disponible de la cuenta
+- status: un enum con valores ACTIVE y BLOCKED
+
+2. Entidad Transaction (para el registro de las transferencias):
+- id: Long, clave primaria autogenerada
+- transactionReference: String, codigo unico de referencia
+- sourceAccountNumber: String, cuenta de origen
+- destinationAccountNumber: String, cuenta de destino
+- bankName: String, nombre del banco
+- amount: BigDecimal, monto trasladado
+- description: String, concepto o motivo del traslado
+- timestamp: LocalDateTime, fecha y hora de la transaccion
+- status: un enum con valores SUCCESS y FAILED
+- qrCodeData: String, datos basicos de la transaccion codificados
+- qrCodeBase64: String, imagen del codigo QR en Base64
+
+Generar getters, setters y constructores.
+Usa las anotaciones JPA correctas.
+
+
+================================================================================
+PROMPT 4: GENERAR EL REPOSITORY JPA
+================================================================================
+Crea los repositorios Spring Data JPA para las entidades Account y Transaction:
+
+1. AccountRepository:
+Debe extender JpaRepository y tener metodos para:
+- Buscar una cuenta por su numero de cuenta (findByAccountNumber)
+- Verificar si existe una cuenta por su numero (existsByAccountNumber)
+
+2. TransactionRepository:
+Debe extender JpaRepository y tener metodos para:
+- Buscar una transaccion por su codigo de referencia (findByTransactionReference)
+- Listar todas las transacciones ordenadas por fecha de forma descendente 
+  para el historico (findAllByOrderByTimestampDesc)
+
+
+================================================================================
+PROMPT 5: GENERAR LA CAPA SERVICE Y CAPA CONTROLLER
+================================================================================
+[Capa Service]
+Crea una clase TransferService que contenga la logica de negocio del sistema 
+bancario.
+Debe:
+- Realizar el traslado de dinero entre cuentas:
+  * Verificar que la cuenta de origen y de destino no sean iguales
+  * Verificar que ambas cuentas existan y esten activas
+  * Verificar que la cuenta de origen tenga saldo suficiente para el traslado
+  * Descontar el dinero de la cuenta de origen y sumarlo a la cuenta de destino
+- Generar para el resultado de la transaccion un codigo QR con los datos basicos 
+  de la transaccion codificados (referencia, fecha, cuenta origen, cuenta destino, 
+  monto y estado) usando la libreria ZXing.
+- Guardar la transaccion en el historico.
+- Lanzar una excepcion personalizada cuando se violen las reglas de negocio 
+  (saldo insuficiente, cuenta no encontrada, etc.).
+
+[Capa Controller]
+Crea los controladores REST para las cuentas y los traslados de dinero.
+Debe exponer los siguientes endpoints:
+- GET /api/accounts -> listar todas las cuentas con sus saldos
+- POST /api/transfers -> realizar una nueva transferencia y retornar el comprobante con su codigo QR
+- GET /api/transfers -> listar el historico de todas las transacciones realizadas
+- GET /api/transfers/{reference} -> consultar el resultado de una transaccion por su referencia
+Devuelve codigos de estado HTTP adecuados en cada caso (201, 400, 404, 409).
+
+
+================================================================================
+PROMPT 6: CREAR EL FILTRO CORS
+================================================================================
+Crea una clase Configuration para crear un filtro de CORS que se aplicara 
+a todas las rutas (/**). Le indica a Spring Boot que debe aceptar 
+peticiones del origen http://localhost:3000 y permite todos los metodos y 
+cabeceras necesarios para la comunicacion con el frontend en React.
+
+
+================================================================================
+PROMPT 7: CREAR LA ESTRUCTURA DEL PROYECTO CON REACTJS (Servicio)
+================================================================================
+Usando @.cursor/rules/springboot.mdc como regla, crea un servicio en 
+ReactJS llamado TransferService.
+Debe:
+- Usar AXIOS
+- Tener metodos para:
+  * Obtener todas las cuentas bancarias (getAccounts)
+  * Realizar una transferencia de dinero (createTransfer)
+  * Obtener el historico de transacciones (getTransactionHistory)
+- Usar una variable de entorno para la URL del backend
+Realiza las configuraciones adecuadas para que todo quede en 
+funcionamiento.
+
+
+================================================================================
+PROMPT 8: VISTAS DE REACT - TABLA DE HISTORICO DE TRANSACCIONES
+================================================================================
+Crea una pagina en ReactJS que muestre una tabla con el historico de 
+transacciones realizadas en el banco.
+El componente debe:
+- Obtener las transacciones desde el TransferService
+- Mostrar los datos en una tabla dinamica: referencia, fecha, cuenta origen, 
+  cuenta destino, monto, concepto y estado
+- Permitir ver el codigo QR y los datos de cada transaccion mediante un boton
+- Incluir un campo de busqueda para filtrar transacciones
+- Usar el servicio TransferService
+Recuerda tener separados los archivos del componente (.tsx y .css).
+
+
+================================================================================
+PROMPT 9: VISTAS DE REACT - FORMULARIO DE TRASLADO Y MODAL CON CODIGO QR
+================================================================================
+Crea los componentes en ReactJS para realizar el traslado de dinero y mostrar 
+el resultado:
+
+1. Formulario de transferencia:
+Debe incluir los campos:
+- Cuenta de origen (selector con las cuentas disponibles y su saldo)
+- Cuenta de destino (selector con las cuentas de destino)
+- Monto a transferir (campo numerico obligatorio mayor a 0)
+- Concepto o descripcion del traslado
+Todos los campos son obligatorios.
+Al enviar el formulario, debe llamarse al metodo createTransfer del servicio.
+Si ocurre un error (por ejemplo, saldo insuficiente), muestra un componente 
+tipo toast con el mensaje de error.
+
+2. Modal con resultado y codigo QR:
+Cuando la transaccion sea exitosa:
+- Mostrar una ventana modal con el mensaje de exito.
+- Mostrar la imagen del codigo QR generado por el backend que contiene 
+  los datos basicos de la transaccion codificados.
+- Mostrar los datos de la transferencia (referencia, cuentas, monto, fecha) 
+  y un boton para descargar la imagen del QR.
+
+
+================================================================================
+PROMPT 10: GENERAR DOCUMENTACION TECNICA COMPLETA (README.md)
+================================================================================
+Genera un Readme.md completo y detallado para el proyecto de traslado de 
+dinero en el banco que incluya:
+- El stack tecnologico empleado en el backend (Java, Spring Boot, Spring Data JPA, ZXing)
+- El stack tecnologico empleado en el frontend (React, TypeScript, Axios)
+- La base de datos usada (PostgreSQL / H2)
+- La explicacion de como funciona la generacion del codigo QR con los datos codificados
+- Las instrucciones paso a paso para ejecutar el backend y el frontend
+- La documentacion de los endpoints generados
+Subelo despues al Repo de Github.
+
+================================================================================
+                         FIN DEL ARCHIVO DE PROMPTS
+================================================================================
