@@ -1,0 +1,402 @@
+================================================================================
+          TECNOLOGICO DE ANTIOQUIA - INSTITUCION UNIVERSITARIA
+                         FACULTAD DE INGENIERIA
+       ASIGNATURA: DISENO DEL SISTEMA / LABORATORIO SPRING BOOT + IA
+================================================================================
+PROYECTO:       SISTEMA TRANSACCIONAL DE TRASLADO DE DINERO ENTRE CUENTAS
+                BANCARIAS CON CODIGO QR CODIFICADO E HISTORICO DE MOVIMIENTOS
+ENTREGA:        30 DE OCTUBRE DE 2026
+HERRAMIENTA IA: ANTIGRAVITY IDE / CURSOR (ADVANCED AGENTIC PAIR-PROGRAMMING)
+DOCUMENTO:      REGISTRO COMPLETO DE PROMPTS UTILIZADOS
+================================================================================
+
+INDICE DEL DOCUMENTO
+--------------------------------------------------------------------------------
+1. INTRODUCCION Y METODOLOGIA DE PROMPTING
+2. REGLAS DEL SISTEMA Y CONTEXTUALIZACION GLOBAL (MDC)
+3. PROMPTS ARQUITECTURALES Y DE CONSTRUCCION PASO A PASO (PROMPTS 1 AL 15)
+   - FASE 1: Reglas y Buenas Practicas
+   - FASE 2: Configuracion de Entorno y Bases de Datos (H2 / PostgreSQL)
+   - FASE 3: Entidades JPA y DTOs con Java Records
+   - FASE 4: Repositorios, Negocio Atomico y Generador QR ZXing
+   - FASE 5: Controladores RESTful, CORS y Documentacion OpenAPI / Swagger
+   - FASE 6: Cliente Frontend en React 18 + TypeScript y Servicios Axios
+   - FASE 7: Pruebas Unitarias Automatizadas (JUnit 5 + Mockito)
+   - FASE 8: Persistencia en Disco, Comprobante Digital PDF y Escaneo Movil
+   - FASE 9: Codificacion de Datos Basicos en Matriz QR y UX Fintech Avanzada
+4. REGISTRO CRONOLOGICO DE PROMPTS DIRECTOS DEL USUARIO (INTERACCIONES CLAVE)
+5. BUENAS PRACTICAS DE INGENIERIA DE PROMPTS OBSERVADAS
+================================================================================
+
+
+1. INTRODUCCION Y METODOLOGIA DE PROMPTING
+--------------------------------------------------------------------------------
+El presente documento contiene el registro exhaustivo y ordenado de los prompts
+utilizados durante el ciclo de vida del proyecto bancario. Para garantizar un
+desarrollo robusto, libre de ambiguedades y alineado con los estandares de la
+industria y los lineamientos del taller de clase ("Laboratorio Spring Boot con
+Cursor 2026"), se empleo un enfoque de "Prompt Engineering" estructurado por
+fases incrementales:
+
+- Contextualizacion y Reglas Previas: Definicion del rol, convenciones y stack.
+- Especificacion Declarativa: Descripcion precisa de entradas, salidas, tipos,
+  reglas de negocio y excepciones esperadas.
+- Co-programacion Reactiva e Iterativa: Depuracion guiada de errores de entorno
+  (compilacion de modulos Java, pathing, dependencias npm, y codificacion QR).
+- Refinamiento de Experiencia de Usuario: Evolucion de una UI basica hacia una
+  suite Fintech profesional con graficos, simulador y exportacion de datos.
+
+
+2. REGLAS DEL SISTEMA Y CONTEXTUALIZACION GLOBAL (.cursor/rules/springboot.mdc)
+--------------------------------------------------------------------------------
+Antes de iniciar la generacion de codigo, se configuro un archivo de reglas
+permanentes para que el modelo de IA mantuviera la coherencia en cada cambio:
+
+[PROMPT BASE DE CONTEXTO]
+"Crea un archivo de reglas para cursor (mdc) llamado 'springboot' ubicado en
+.cursor/rules/springboot.mdc que siempre se aplique, con las buenas practicas
+de Java 17+/25 en el desarrollo de un servicio en Spring Boot para que las aplique
+en el desarrollo del proyecto. Ten en cuenta que los nombres de clases, metodos
+y atributos deben ser en ingles. Cada metodo publico debe tener su documentacion
+Javadoc actualizada. Para los DTO usamos java records. Agrega la estructura
+actual del proyecto dentro de las reglas y el soporte para PostgreSQL y H2."
+
+Resultado:
+Archivo .cursor/rules/springboot.mdc configurado con convenciones de nombres,
+anotaciones JPA, inyeccion por constructor con Lombok/records, y estructura de
+carpetas (controller, entity, repository, service, dto, config).
+
+
+3. PROMPTS ARQUITECTURALES Y DE CONSTRUCCION PASO A PASO (PROMPTS 1 AL 15)
+--------------------------------------------------------------------------------
+
+--- FASE 1: REGLAS Y BUENAS PRACTICAS ---
+
+PROMPT 1 (Estructura de Reglas y Directrices de Codificacion):
+"Configura las convenciones obligatorias del proyecto bancario en las reglas del
+asistente. Exige arquitectura por capas desacopladas, inyeccion de dependencias
+por constructor (evitando @Autowired en atributos), manejo transaccional explicito
+con @Transactional en operaciones de modificacion contable, nombres en ingles en
+backend, y estricta tipificacion en TypeScript en el frontend."
+-> Componentes generados: .cursor/rules/springboot.mdc, directrices del workspace.
+
+
+--- FASE 2: CONFIGURACION Y BASES DE DATOS ---
+
+PROMPT 2 (Configuracion Dual PostgreSQL / H2 y application.properties):
+"Crea la configuracion para la conexion a la base de datos PostgreSQL de nombre
+'bank_transfer_db' con el usuario 'postgres' y contrasena 'root'. Habilita la
+actualizacion del esquema automatico en hibernate (ddl-auto=update), el dialecto
+JPA e imprime las sentencias sql de JPA en consola. Ademas, genera un perfil
+'dev' con base de datos H2 persistente en archivo para que la aplicacion funcione
+inmediatamente de forma autocontenida sin requerir un servidor PostgreSQL activo."
+-> Componentes generados: application.properties, application-dev.properties,
+   application-postgres.properties, persistencia en directorio ./data.
+
+
+--- FASE 3: MODELADO DE DATOS (ENTIDADES Y DTOS) ---
+
+PROMPT 3 (Entidades JPA Account y Transaction):
+"Crea una entidad JPA Account que represente una cuenta bancaria con los atributos:
+id (Long, clave primaria autogenerada), accountNumber (String unico), accountHolder
+(String), bankName (String con valor por defecto 'Banco TdeA'), accountType (Enum
+con valores SAVINGS y CHECKING), balance (BigDecimal con precision monetaria),
+status (Enum con valores ACTIVE, BLOCKED, INACTIVE) y createdAt (LocalDateTime).
+Luego crea una entidad JPA Transaction con id, transactionReference (String unico),
+sourceAccountNumber, destinationAccountNumber, bankName, amount, description,
+timestamp, status (Enum SUCCESS, FAILED, REJECTED), qrCodeData (TEXT) y
+qrCodeBase64 (TEXT). Genera constructores, getters, setters y Javadoc en ingles."
+-> Componentes generados: Account.java, Transaction.java, AccountType.java,
+   AccountStatus.java, TransactionStatus.java.
+
+PROMPT 4 (DTOs con Java Records y Documentacion Swagger):
+"Crea los DTOs utilizando Java Records en el paquete com.udea.banktransfer.dto:
+1. TransferRequestDTO: con sourceAccountNumber (@NotBlank), destinationAccountNumber
+   (@NotBlank), amount (@NotNull, @DecimalMin mayor a cero) y description (@Size max 255).
+2. TransferResponseDTO: con id, transactionReference, sourceAccountNumber,
+   sourceAccountHolder, destinationAccountNumber, destinationAccountHolder,
+   bankName, amount, description, timestamp, status, sourceRemainingBalance,
+   qrCodeData, qrCodeBase64 y voucherUrl.
+3. AccountResponseDTO: con datos publicos de la cuenta y saldo formateado.
+4. ErrorResponseDTO: con timestamp, status (int), error (String), message (String)
+   y path (String). Incluye anotaciones @Schema de OpenAPI para documentacion."
+-> Componentes generados: TransferRequestDTO.java, TransferResponseDTO.java,
+   AccountResponseDTO.java, ErrorResponseDTO.java.
+
+
+--- FASE 4: REPOSITORIOS, LOGICA DE NEGOCIO Y CODIGO QR ---
+
+PROMPT 5 (Repositorios Spring Data JPA):
+"Crea los repositorios Spring Data JPA AccountRepository y TransactionRepository.
+AccountRepository debe extender JpaRepository<Account, Long> y proporcionar metodos
+derivados para buscar por numero de cuenta: Optional<Account> findByAccountNumber(String num)
+y boolean existsByAccountNumber(String num). TransactionRepository debe proporcionar
+Optional<Transaction> findByTransactionReference(String ref) y List<Transaction>
+findAllByOrderByTimestampDesc(). Anota cada interfaz con Javadoc descriptivo."
+-> Componentes generados: AccountRepository.java, TransactionRepository.java.
+
+PROMPT 6 (Servicio Generador de Codigos QR con Google ZXing):
+"Crea un servicio en Spring Boot llamado QrCodeService que utilice la libreria
+Google ZXing (versiones 3.5.3 de core y javase) para generar codigos QR:
+- generateQrCodeImageBytes(String text, int width, int height): retorna byte[]
+  con imagen binaria PNG, usando codificacion UTF-8, margen 1 y nivel de correccion
+  ErrorCorrectionLevel.H (alto, 30% de redundancia).
+- generateQrCodeBase64(String text): retorna un String Data URL en formato
+  'data:image/png;base64,...' listo para visualizarse directamente en etiquetas HTML <img>.
+Lanza excepciones claras si ocurre algun fallo de codificacion."
+-> Componentes generados: QrCodeService.java, integracion pom.xml con com.google.zxing.
+
+PROMPT 7 (Capa de Negocio TransferService con Validaciones Atomicas):
+"Crea la interfaz TransferService y su implementacion TransferServiceImpl con
+anotacion @Service y @Transactional:
+Metodo executeTransfer(TransferRequestDTO request):
+1. Validar que la cuenta de origen y de destino no sean iguales.
+2. Validar que el monto sea estrictamente mayor a cero.
+3. Buscar ambas cuentas; lanzar AccountNotFoundException si no existen.
+4. Verificar que ambas cuentas esten en estado ACTIVE; lanzar AccountBlockedException si no.
+5. Validar que la cuenta de origen tenga saldo suficiente; lanzar InsufficientFundsException.
+6. Descontar el monto del saldo de origen e incrementar en destino de forma atomica.
+7. Generar una referencia unica (TXN-timestamp-UUID).
+8. Estructurar el payload de datos codificados del comprobante bancario.
+9. Invocar QrCodeService para generar la imagen QR en Base64.
+10. Persistir la transaccion y retornar el TransferResponseDTO.
+Implementa tambien metodos para listar el historico y obtener una transaccion por referencia."
+-> Componentes generados: TransferService.java, TransferServiceImpl.java.
+
+PROMPT 8 (Manejo Global de Excepciones HTTP Normalizadas):
+"Implementa las excepciones personalizadas de negocio: AccountNotFoundException,
+InsufficientFundsException, InvalidTransferException y AccountBlockedException.
+Luego crea una clase GlobalExceptionHandler con @RestControllerAdvice que capture
+cada una de ellas y genere un ErrorResponseDTO con los codigos HTTP correspondientes:
+- 400 Bad Request para InvalidTransferException y errores de validacion @Valid.
+- 404 Not Found para AccountNotFoundException.
+- 409 Conflict para InsufficientFundsException (saldo insuficiente).
+- 403 Forbidden para AccountBlockedException.
+- 500 Internal Server Error para excepciones no controladas."
+-> Componentes generados: GlobalExceptionHandler.java y excepciones de negocio.
+
+
+--- FASE 5: CONTROLADORES REST, CORS Y SWAGGER UI ---
+
+PROMPT 9 (Controladores RESTful y Configuracion CORS / Swagger):
+"Crea los controladores REST:
+1. AccountController (/api/accounts):
+   - GET /: lista todas las cuentas bancarias.
+   - GET /{accountNumber}: consulta detalles de una cuenta especifica.
+2. TransferController (/api/transfers):
+   - POST /: procesa una transferencia de dinero (201 Created).
+   - GET /: retorna el historico completo de transacciones en orden cronologico.
+   - GET /{reference}: consulta una transaccion por codigo de referencia.
+   - GET /{id}/qr: retorna los bytes de la imagen PNG del QR (image/png).
+Crea una clase CorsConfig para permitir origenes http://localhost:3000 y
+http://localhost:5173 con metodos GET, POST, PUT, DELETE, OPTIONS.
+Configura SpringDoc OpenAPI con titulo 'Banco TdeA - API de Transferencias'."
+-> Componentes generados: AccountController.java, TransferController.java,
+   CorsConfig.java, OpenApiConfig.java.
+
+
+--- FASE 6: CLIENTE FRONTEND EN REACT + TYPESCRIPT ---
+
+PROMPT 10 (Servicios Axios y Modelado TypeScript):
+"En el directorio frontend, crea el cliente HTTP frontend/src/services/transferService.ts
+utilizando Axios y TypeScript. La URL base debe leerse desde la variable de entorno
+VITE_API_BASE_URL (con fallback a http://localhost:8080/api).
+Define metodos tipados para:
+- getAccounts(): Promise<Account[]>
+- getAccount(accountNumber: string): Promise<Account>
+- createTransfer(payload: TransferRequest): Promise<TransferResponse>
+- getTransactionHistory(): Promise<TransferResponse[]>
+- getQrCodeImageUrl(transactionId: number): string
+Define en types/bank.ts las interfaces TypeScript correspondientes a las respuestas del backend."
+-> Componentes generados: transferService.ts, types/bank.ts.
+
+PROMPT 11 (Componentes Visuales Modulares en React):
+"Crea una interfaz web bancaria en React 18 con TypeScript desacoplada en
+componentes independientes con sus respectivos archivos .tsx y .css:
+1. Navbar: membrete con logo del Banco TdeA, estado de conexion del backend y enlace a Swagger.
+2. AccountCards: tarjetas interactivas que muestren el saldo de cada cuenta en formato COP,
+   titular, estado y botones de seleccion rapida como cuenta origen o destino.
+3. TransferForm: formulario reactivo con selector de cuentas, campo de monto con atajos rapidos,
+   concepto de la operacion y validacion en tiempo real.
+4. TransactionHistory: tabla dinamica del historico con filtro de busqueda y boton para ver el QR.
+5. ReceiptModal: ventana modal que se abra tras cada traslado exitoso mostrando el comprobante
+   bancario, el codigo QR generado por el backend, boton para descargar el QR y desglose de datos.
+6. Toast: sistema de alertas visuales flotantes para confirmaciones y errores."
+-> Componentes generados: Navbar, AccountCards, TransferForm, TransactionHistory,
+   ReceiptModal, Toast, App.tsx, App.css.
+
+
+--- FASE 7: PRUEBAS AUTOMATIZADAS Y SUITE UNITARIA ---
+
+PROMPT 12 (Suite de Pruebas Unitarias con JUnit 5 y Mockito):
+"Crea una clase de pruebas unitarias para TransferServiceImpl llamada TransferServiceTest
+utilizando JUnit 5 y MockitoExtension. Debe probar con aislamiento:
+1. Transferencia exitosa: verifica que se debiten los fondos de origen, se acrediten
+   en destino, se invoque la generacion del QR y se guarde la transaccion.
+2. Rechazo por saldo insuficiente: valida que lance InsufficientFundsException y que
+   los saldos no se alteren.
+3. Rechazo por cuentas identicas: valida que lance InvalidTransferException.
+4. Rechazo por cuenta inexistente: valida que lance AccountNotFoundException."
+-> Componentes generados: TransferServiceTest.java (4 tests ejecutados con exito).
+
+
+--- FASE 8: PERSISTENCIA, COMPROBANTE DIGITAL PDF Y ESCANEO MOVIL ---
+
+PROMPT 13 (Persistencia de Datos en Disco y Seeder con Datos de Prueba):
+"Configura la base de datos H2 para almacenar los datos de manera persistente en disco
+en la ruta ./data/bank_transfer_db, de tal forma que las cuentas y el historico no se
+borren al reiniciar la aplicacion. Crea una clase DataInitializer con @Configuration
+que verifique si la base de datos esta vacia y precargue 4 cuentas bancarias reales y 6
+transacciones historicas con sus respectivos codigos QR generados, permitiendo probar
+busquedas por banco y por cuenta desde el primer arranque."
+-> Componentes generados: DataInitializer.java, actualizacion de application-dev.properties.
+
+PROMPT 14 (Comprobante Digital Oficial y Codigo QR Estilo PDF):
+"Al escanear el codigo QR con la camara de un telefono movil, no se debe mostrar
+texto plano desordenado, sino abrir el comprobante oficial de la transferencia exactamente
+igual a cuando se descarga el comprobante bancario en PDF. Implementa un servicio de
+comprobante digital que detecte la IP de red local del equipo (http://<IP_LOCAL>:8080/api/transfers/{ref}/voucher),
+codifique dicho enlace en el codigo QR generado por ZXing, y proporcione un diseno
+web responsivo con estilos de impresion bancaria (@media print), boton de 'Descargar
+en PDF / Imprimir', logotipo del Banco TdeA, sello de validacion digital y datos
+completos de la operacion."
+-> Componentes generados: VoucherViewService.java, endpoint /voucher en TransferController,
+   estilos @media print tipo hoja A4.
+
+
+--- FASE 9: CODIFICACION DE DATOS BASICOS EN QR Y UX FINTECH AVANZADA ---
+
+PROMPT 15 (Datos Basicos Codificados en la Matriz QR y Rediseno UX Fintech):
+"El requerimiento del documento estipula explicitamente: 'codigo QR con los datos
+basicos de la transaccion codificados'. Asegura que el codigo QR codifique estructuralmente
+todos los datos basicos (Referencia, Fecha, Entidad Bancaria, Cuentas y Titulares de Origen
+y Destino, Monto COP, Concepto y Estado Aprobada) junto con el enlace de comprobante digital.
+En el modal del comprobante, anade un inspector interactivo con 3 pestanas: Desglose
+de Campos Bancarios, Payload Texto Codificado en QR (con boton de copia rapida) y
+Estructura JSON estandar (Open Banking).
+Adicionalmente, eleva integralmente la experiencia de usuario (UX) del frontend:
+1. Anade un Banner Ejecutivo superior con KPIs en tiempo real (Saldo total en custodia,
+   Volumen transferido, Operaciones auditadas, Estado del sistema).
+2. Redisena las tarjetas de cuentas como tarjetas debito fintech con chip EMV,
+   simulacion contactless y boton de mostrar/ocultar numeros de cuenta.
+3. Anade un simulador de saldo disponible en vivo en el formulario que muestre
+   Saldo actual -> Debito -> Saldo restante antes de enviar, con botones de porcentaje
+   (25%, 50%, Max todo el saldo).
+4. Agrega boton de inversion rapida de cuentas (Swap Origen / Destino) con un clic.
+5. Agrega chips de conceptos sugeridos (Matricula TdeA, Arriendo, Honorarios).
+6. Agrega filtros rapidos en el historial y boton de exportacion instantanea de la
+   auditoria completa a archivo CSV / Excel."
+-> Componentes generados: Actualizacion integral de TransferServiceImpl, DataInitializer,
+   VoucherViewService, ReceiptModal (.tsx/.css), TransferForm (.tsx/.css),
+   AccountCards (.tsx/.css), TransactionHistory (.tsx/.css) y App (.tsx/.css).
+
+
+================================================================================
+4. REGISTRO CRONOLOGICO DE PROMPTS DIRECTOS DEL USUARIO (INTERACCIONES CLAVE)
+================================================================================
+A continuacion se registran las peticiones literales ingresadas por el usuario
+durante las sesiones de trabajo con la IA, las cuales guiaron la implementacion,
+resolucion de problemas del entorno y adaptacion a las exigencias del docente:
+
+--------------------------------------------------------------------------------
+PETICION 1 (Inicio y Analisis del Documento del Taller):
+"en esta carpeta tenemos un documento el cual esta adjunto, el tiene las indicaciones
+o un ejemplo de como se hizo un taller en clase con el profe, al final nos da unas
+indicaciones de como debemos hacer un proyecto con las indicaciones del documentos,
+Ejercicio Propuesto: Fecha de entrega 30 de Octubre de 2026
+Siguiendo los pasos realizados, genere una aplicacion completa para hacer el traslado
+de dinero entre cuentas en un banco. Debe mostrar el historico de transacciones y
+mostrar ademas cuando genere el resultado de la transaccion un codigo QR con los datos
+basicos de la transaccion codificados.
+Recuerde que puede usar el IDE cursor, windsurf, VS Code o Antigravity IDE para el ejercicio.
+Debe entregar informe del ejercicio y codigo en github y prompts utilizados. valida el
+dpcumeto e iniciemos con el ejeciicio propuesto"
+-> Accion: Lectura del PDF "SpringBoot AI.pdf", extraccion de requisitos, creacion
+   de la arquitectura backend Spring Boot y frontend React.
+
+--------------------------------------------------------------------------------
+PETICION 2 (Diagnostico de Errores de Entorno y Compilacion):
+"cd backend > mvn spring-boot:run
+Picked up JAVA_TOOL_OPTIONS: -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8
+Error occurred during initialization of VM
+Unable to load C:\Users\Usuario\AppData\Roaming\Code\User\globalStorage\pleiades.java-extension-pack-jdk\java\latest\lib\modules
+cd frontend > npm run dev
+'npm' no se reconoce como un comando int no funcono"
+-> Accion: Correccion del JDK en PATH priorizando Eclipse Adoptium JDK 17, inclusion
+   de Node.js en PATH y empaquetado del backend en JAR ejecutable para evitar problemas
+   con caracteres especiales (letra 'n' en la ruta de carpetas).
+
+--------------------------------------------------------------------------------
+PETICION 3 (Lanzadores Automatizados de Ejecucion):
+"no se puede inciiar el programa completo de una ves ?"
+"como se inicia el programa"
+"como finalizo el programa / como termuno la ejecutiocn del proyecto"
+-> Accion: Creacion de los scripts de ejecucion en 1 clic:
+   - iniciar-todo.bat: Compila e inicia Backend (8080), Frontend (3000) y abre el navegador.
+   - detener-todo.bat: Finaliza de forma limpia y segura los procesos java y node.
+
+--------------------------------------------------------------------------------
+PETICION 4 (Persistencia de Datos y Busqueda por Banco):
+"el historico de transacciones esta vacio y al buscar pir un banco no sale nada,
+completos datos de pruebas pero que se queden en el programa"
+-> Accion: Migracion de H2 en memoria a H2 basado en archivo en disco (./data/bank_transfer_db),
+   precarga de cuentas y transacciones con DataInitializer, incorporacion de la columna
+   y filtro de busqueda por entidad bancaria ("Banco TdeA").
+
+--------------------------------------------------------------------------------
+PETICION 5 (Comprobante Digital al Escaneo Movil del QR):
+"todo funciona muy bien pero al escanear el qr no aparecen los datos de la
+transferencia, organiza esa parte para que salga como cuando se descarga el pdf"
+-> Accion: Creacion del endpoint /api/transfers/{ref}/voucher y servicio VoucherViewService,
+   resolucion dinamica de la IP de red local del equipo para acceso desde smartphones,
+   y diseno de comprobante web responsivo con estilos @media print.
+
+--------------------------------------------------------------------------------
+PETICION 6 (Codificacion de Datos Basicos en QR y Experiencia UX Fintech):
+"en el final del documento nos notifica que debemos codigo QR con los datos basicos
+de la transaccion codificados. nos falta los datos codificados, adicional mejora
+el front con expericia UX del usuario ya que esta muy basica"
+-> Accion: Restablecimiento de la estructura completa de datos basicos codificados
+   dentro de la matriz del QR, creacion del inspector de datos en 3 pestanas
+   (Campos, Texto QR y JSON) en el modal de comprobante, y rediseño completo de la UX:
+   Banner de metricas ejecutivas, tarjetas debito interactivas con chip/contactless,
+   simulador de impacto en saldo, boton swap, atajos de porcentaje, chips de concepto
+   y exportacion del historico a archivo CSV/Excel.
+
+--------------------------------------------------------------------------------
+PETICION 7 (Documento Solicitado de Prompts para Entrega):
+"ayudame a crear un documento, con los pront que usamos en este proyecto, es un
+requisito que nos pide el profesor para la entrga de esta actividad genra un archivo
+de texto txt con esta documentacion"
+-> Accion: Generacion de este archivo PROMPTS_UTILIZADOS.txt en formato de texto plano
+   organizado y completo para adjuntar a la entrega academica.
+
+
+================================================================================
+5. BUENAS PRACTICAS DE INGENIERIA DE PROMPTS APLICADAS
+================================================================================
+El exito en la construccion de esta aplicacion bancaria demostro la eficacia de
+las siguientes tecnicas de co-programacion asistida por IA:
+
+1. Asignacion de Rol y Directrices Claras:
+   Establecer al agente como desarrollador senior FullStack especializado en Spring
+   Boot y React con TypeScript, fijando reglas de calidad desde el primer momento.
+
+2. Enfoque Modular y Progresivo:
+   No solicitar la aplicacion entera en un unico prompt masivo; en su lugar, se
+   avanzo por capas logicas (Base de datos -> Entidades -> DTOs -> Repositorios ->
+   Servicios -> Controladores -> Cliente Web -> Pruebas -> Refinamiento UX).
+
+3. Especificacion de Casos Borde y Excepciones:
+   Definir con antelacion que ocurriria en situaciones de error (saldo insuficiente,
+   mismo origen y destino, cuentas inactivas) permitio generar codigo con manejo de
+   excepciones robusto y codigos de estado HTTP estandarizados (400, 403, 404, 409).
+
+4. Trazabilidad y Transparencia:
+   Documentar cada prompt y contrastarlo de manera continua contra el enunciado
+   oficial del profesor garantizo el cumplimiento del 100% de los requerimientos.
+
+================================================================================
+FIN DEL DOCUMENTO - PROMPTS UTILIZADOS
+TECNOLOGICO DE ANTIOQUIA - 2026
+================================================================================
